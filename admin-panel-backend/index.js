@@ -15,7 +15,7 @@ const app = express();
 // Middleware to enable CORS
 app.use(
   cors({
-    origin: "http://localhost:5174", // Allow only this origin
+    origin: "http://localhost:5175", // Allow only this origin
     methods: ["GET", "POST"], // Allow only specific methods
     credentials: true, // Allow cookies and authentication headers
   })
