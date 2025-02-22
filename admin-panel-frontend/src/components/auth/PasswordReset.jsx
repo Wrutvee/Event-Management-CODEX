@@ -143,7 +143,7 @@ export default function PasswordReset() {
                     ? 'bg-gray-400' 
                     : 'bg-blue-600 hover:bg-blue-700'}`}
               >
-                Get OTP
+                {isLoading ? <div className="dots-loader" /> : 'Get OTP'}
               </button>
             </div>
           </div>
@@ -181,7 +181,7 @@ export default function PasswordReset() {
                 ? 'bg-gray-400' 
                 : 'bg-blue-600 hover:bg-blue-700'}`}
           >
-            {isLoading ? 'Processing...' : 'Reset Password'}
+            {isLoading ? <div className="dots-loader" /> : 'Reset Password'}
           </button>
         </form>
       </div>
