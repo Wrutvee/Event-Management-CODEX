@@ -1,0 +1,19 @@
+{
+  "name": "users-panel-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/owaish3301/Event-Management-Users-Panel-Backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/owaish3301/Event-Management-Users-Panel-Backend/issues"
+  },
+  "homepage": "https://github.com/owaish3301/Event-Management-Users-Panel-Backend#readme"
+}

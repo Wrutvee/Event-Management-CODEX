@@ -1,0 +1,40 @@
+let csrfToken = null;
+let tokenExpiryTime = null;
+const TOKEN_LIFETIME = 30 * 60 * 1000; // 30 minutes in milliseconds
+
+export const fetchCsrfToken = async () => {
+  // Return existing token if it's still valid
+  if (csrfToken && tokenExpiryTime && Date.now() < tokenExpiryTime) {
+    console.log('Returning existing CSRF token:', csrfToken);
+    return csrfToken;
+  }
+
+  try {
+    const response = await fetch('http://localhost:3000/csrf-token', {
+      credentials: 'include'
+    });
+    const data = await response.json();
+    csrfToken = data.csrfToken;
+    tokenExpiryTime = Date.now() + TOKEN_LIFETIME;
+    console.log('Fetched new CSRF token:', csrfToken);
+    return csrfToken;
+  } catch (error) {
+    console.error('Failed to fetch CSRF token:', error);
+    throw error;
+  }
+};
+
+export const addCsrfToken = (headers = {}) => {
+  if (csrfToken) {
+    return {
+      ...headers,
+      'X-CSRF-TOKEN': csrfToken
+    };
+  }
+  return headers;
+};
+
+export const invalidateToken = () => {
+  csrfToken = null;
+  tokenExpiryTime = null;
+};
