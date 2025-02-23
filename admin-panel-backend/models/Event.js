@@ -81,22 +81,25 @@ const EventSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["cancelled", "upcoming", "past"],
-      default: "upcoming",
+      enum: ["cancelled", "running"],
+      default: "running",
     },
     isFeedbackEnabled: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
 
-// Pre-save middleware to calculate duration
+// Pre-save middleware to calculate duration and update status
 EventSchema.pre('save', function(next) {
+    const now = new Date();
+    
+    // Calculate duration
     if (this.dateTime.start && this.dateTime.end) {
         const duration = (new Date(this.dateTime.end) - new Date(this.dateTime.start)) / (1000 * 60 * 60);
         this.dateTime.durationInHours = Math.round(duration * 100) / 100;
     }
     
-    // Set attendance.isRequired based on qrCheckin and manualCheckin
+    // Set attendance.isRequired
     this.attendance.isRequired = this.attendance.qrCheckin || this.attendance.manualCheckin;
     
     next();

@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useAdminProfile } from "../../context/AdminProfileContext";
 import AccessDenied from "./AcessDenied";
 import mainLogo from "/logos/main_logo.png";
 import { addCsrfToken, fetchCsrfToken } from "../../utils/csrf";
 import { validatePassword } from "../../utils/passwordValidation";
 
 export default function SignupPage() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { adminProfile } = useAdminProfile();
+  const [searchParams] = useSearchParams();
   const [inviteCode, setInviteCode] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,6 +28,12 @@ export default function SignupPage() {
       setInviteCode(code);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (adminProfile) {
+      navigate('/home');
+    }
+  }, [adminProfile, navigate]);
 
   const handlePasswordChange = (e) => {
     const newPassword = e.target.value;

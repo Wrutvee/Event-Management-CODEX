@@ -1,14 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAdminProfile } from "../../context/AdminProfileContext";
 import mainLogo from '/logos/main_logo.png'
 import { addCsrfToken, fetchCsrfToken } from "../../utils/csrf";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { adminProfile, updateProfile } = useAdminProfile();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+
+  // Check authentication status on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await fetchCsrfToken();
+        const response = await fetch(`${import.meta.env.VITE_BASE_API_URL}/auth/verify`, {
+          headers: addCsrfToken(),
+          credentials: 'include',
+        });
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          updateProfile(data.user);
+          navigate('/home');
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    checkAuth();
+  }, [navigate, updateProfile]);
+
+  if (isChecking) {
+    return <div className="flex justify-center items-center min-h-screen">
+      <div className="dots-loader" />
+    </div>;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
