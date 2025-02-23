@@ -6,6 +6,7 @@ import Home from './components/home/Home';
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { CsrfProvider } from './context/CsrfContext';
 import { AdminProfileProvider } from './context/AdminProfileContext';
+import CreateEvent from './components/events/CreateEvent';
 
 function App() { 
   return (
@@ -25,6 +26,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Home />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/events/create'
+              element={
+                <ProtectedRoute>
+                  <CreateEvent />
                 </ProtectedRoute>
               }
             />

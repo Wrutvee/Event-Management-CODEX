@@ -9,7 +9,7 @@ export const fetchCsrfToken = async () => {
   }
 
   try {
-    const response = await fetch('http://localhost:3000/csrf-token', {
+    const response = await fetch(`${import.meta.env.VITE_BASE_API_URL}/csrf-token`, {
       credentials: 'include'
     });
     const data = await response.json();

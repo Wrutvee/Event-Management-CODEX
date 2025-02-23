@@ -8,27 +8,40 @@ export default function ProtectedRoute({ children }) {
   const { updateProfile } = useAdminProfile();
 
   useEffect(() => {
+    let isMounted = true;
+    let timeoutId;
+
     const checkAuth = async () => {
       try {
         await fetchCsrfToken();
-        const response = await fetch('http://localhost:3000/auth/verify', {
-            headers: addCsrfToken(),
-            credentials: 'include',
+        const response = await fetch(`${import.meta.env.VITE_BASE_API_URL}/auth/verify`, {
+          headers: addCsrfToken(),
+          credentials: 'include',
         });
         const data = await response.json();
         
-        if (response.ok && data.success) {
-          updateProfile(data.user);
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
+        if (isMounted) {
+          if (response.ok && data.success) {
+            updateProfile(data.user);
+            setIsAuthenticated(true);
+          } else {
+            setIsAuthenticated(false);
+          }
         }
       } catch (error) {
-        setIsAuthenticated(false);
+        if (isMounted) {
+          setIsAuthenticated(false);
+        }
       }
     };
+
     checkAuth();
-  }, [updateProfile]);
+
+    return () => {
+      isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, []); // Remove updateProfile from dependencies
 
   if (isAuthenticated === null) {
     return <div>Loading...</div>;

@@ -53,7 +53,7 @@ export default function SignupPage() {
 
     try {
       await fetchCsrfToken();
-      const response = await fetch("http://localhost:3000/auth/signup", {
+      const response = await fetch(`${import.meta.env.VITE_BASE_API_URL}/auth/signup`, {
         method: "POST",
         headers: addCsrfToken({
           "Content-Type": "application/json",

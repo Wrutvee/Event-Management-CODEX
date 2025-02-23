@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addCsrfToken, invalidateToken } from '../../../utils/csrf';
+import { addCsrfToken, fetchCsrfToken, invalidateToken } from '../../../utils/csrf';
 import { useAdminProfile } from '../../../context/AdminProfileContext';
 import { truncateString } from '../../../utils/stringUtils';
 import avatar from '/avatar.png';
@@ -14,7 +14,8 @@ export default function ProfileDropdown() {
   const handleLogout = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/auth/logout', {
+      await fetchCsrfToken();
+      const response = await fetch(`${import.meta.env.VITE_BASE_API_URL}/auth/logout`, {
         method: 'POST',
         headers: addCsrfToken(),
         credentials: 'include',
