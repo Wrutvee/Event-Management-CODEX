@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 
 const Button = ({ 
   children, 
@@ -6,6 +6,7 @@ const Button = ({
   variant = 'primary', 
   fullWidth = false, 
   className = '', 
+  disabled = false, 
   ...props 
 }) => {
   const baseStyles = 'px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors'
@@ -21,11 +22,13 @@ const Button = ({
   return (
     <button
       type={type}
+      disabled={disabled}
       className={`
         ${baseStyles}
         ${variants[variant]}
         ${widthClass}
         ${className}
+        ${disabled ? 'opacity-50' : ''}
       `}
       {...props}
     >
@@ -34,4 +37,4 @@ const Button = ({
   )
 }
 
-export default Button
+export default Button;
