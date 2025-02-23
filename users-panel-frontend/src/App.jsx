@@ -1,29 +1,34 @@
-import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
-import ProtectedRoute from './components/ProtectedRoute'
-import AuthLayout from './layouts/AuthLayout'
-import Login from './pages/Login'
-import SignUp from './pages/SignUp'
-import Home from './pages/Home'
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import Login from './pages/Login';
+import SignUp from './pages/SignUp';
+import Home from './pages/Home';
+import AuthLayout from './layouts/AuthLayout';
+import ProtectedRoute from './components/ProtectedRoute';
+
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
-    <Routes>
-      {/* Auth routes */}
-      <Route element={<AuthLayout />}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-      </Route>
+    <div className="min-h-screen bg-gray-50">
+      <Routes>
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+        </Route>
 
-      {/* Protected routes */}
-      <Route element={<ProtectedRoute />}>
-        <Route path="/home" element={<Home />} />
-      </Route>
+        <Route path="/home" element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        } />
 
-      {/* Redirect root to login */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
-    </Routes>
-  )
+        <Route path="/" element={<Navigate to="/login" replace />} />
+      </Routes>
+      <ToastContainer position="top-right" autoClose={3000} />
+    </div>
+  );
 }
 
-export default App
+export default App;

@@ -1,15 +1,17 @@
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { motion } from 'framer-motion'
 import Button from '../components/Button'
 import InputField from '../components/InputField'
 import SocialLogin from '../components/SocialLogin'
+import AnimatedCheckbox from '../components/AnimatedCheckbox'
 
 function SignUp() {
   const navigate = useNavigate()
   const { register, handleSubmit, watch, formState: { errors } } = useForm()
   const password = watch('password')
+  const [rememberMe, setRememberMe] = useState(false)
 
   const onSubmit = async (data) => {
     try {
@@ -34,15 +36,24 @@ function SignUp() {
       transition={{ duration: 0.5 }}
       className="w-full max-w-md space-y-8"
     >
-      <motion.h1 
-        initial={{ y: -20 }}
-        animate={{ y: 0 }}
-        className="text-3xl font-bold text-center text-gray-900"
-      >
-        Create your account
-      </motion.h1>
-
-      <h2 className="text-2xl sm:text-3xl font-bold text-center">Sign in to your account</h2>
+      <div className="text-center">
+        <motion.h2
+          initial={{ y: -20 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
+        >
+          Create your account
+        </motion.h2>
+        <motion.p
+          initial={{ y: -20 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-2 text-sm text-gray-600"
+        >
+          Join us today and start your journey
+        </motion.p>
+      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
         <motion.div
@@ -103,6 +114,13 @@ function SignUp() {
           />
         </motion.div>
 
+        <div className="flex items-center mb-4">
+          <AnimatedCheckbox
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+          />
+        </div>
+
         <Button 
           type="submit" 
           fullWidth
@@ -124,23 +142,23 @@ function SignUp() {
 
         <SocialLogin />
 
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mt-6 text-center"
-        >
-          <p className="text-sm text-gray-600">Already have an account?</p>
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/login')}
-            className="mt-2 transition-transform hover:scale-105"
+       
+      
+      </div>
+
+      <div className="mt-6 text-center">
+        <p className="text-sm text-gray-600">
+          Already have an account?{' '}
+          <Link 
+            to="/login"
+            className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
           >
-            Sign In
-          </Button>
-        </motion.div>
+            Sign in
+          </Link>
+        </p>
       </div>
     </motion.div>
+    
   )
 }
 

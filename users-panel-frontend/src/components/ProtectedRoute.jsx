@@ -1,10 +1,16 @@
-import { Navigate, Outlet } from 'react-router-dom'
+import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import authService from '../services/authService';
 
-const ProtectedRoute = () => {
-  // For now, we'll simulate authentication with localStorage
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
+const ProtectedRoute = ({ children }) => {
+  const location = useLocation();
+  const isAuthenticated = authService.validateToken();
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />
-}
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
 
-export default ProtectedRoute
+  return children;
+};
+
+export default ProtectedRoute;
