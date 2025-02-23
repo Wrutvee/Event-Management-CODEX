@@ -11,10 +11,12 @@ export default function SignupPage() {
   const [inviteCode, setInviteCode] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [error, setError] = useState(null);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordValidationErrors, setPasswordValidationErrors] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const code = searchParams.get("invite");
@@ -35,14 +37,17 @@ export default function SignupPage() {
     e.preventDefault();
     setError(null);
     setPasswordError(null);
+    setIsLoading(true);
 
     const validationErrors = validatePassword(password);
     if (validationErrors.length > 0) {
       setPasswordValidationErrors(validationErrors);
+      setIsLoading(false);
       return;
     }
     if (password !== confirmPassword) {
       setPasswordError("Passwords do not match");
+      setIsLoading(false);
       return;
     }
 
@@ -55,6 +60,7 @@ export default function SignupPage() {
         }),
         body: JSON.stringify({
           email,
+          name,
           password,
           inviteCode,
         }),
@@ -71,6 +77,8 @@ export default function SignupPage() {
       navigate('/home');
     } catch (error) {
       setError(error.message || 'Error during registration');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -108,7 +116,20 @@ export default function SignupPage() {
             />
           </div>
 
-          <div className="mt-4">
+          <div className="mt-2">
+            <label className="block text-gray-700">Name</label>
+            <input
+              type="text"
+              className="mt-1 w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+              placeholder="Enter your full name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              autoComplete="name"
+            />
+          </div>
+
+          <div className="mt-2">
             <label className="block text-gray-700">Password</label>
             <input
               type="password"
@@ -128,7 +149,7 @@ export default function SignupPage() {
             )}
           </div>
 
-          <div className="mt-4">
+          <div className="mt-2">
             <label className="block text-gray-700">Confirm Password</label>
             <input
               type="password"
@@ -146,9 +167,10 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            className="w-full mt-6 bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition"
+            disabled={isLoading}
+            className="w-full mt-6 bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition disabled:bg-blue-400"
           >
-            Sign Up
+            {isLoading ? <div className="dots-loader" /> : "Sign Up"}
           </button>
         </form>
       </div>

@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const Admin = require('../../models/Admin');
 const OTP = require('../../models/OTP');
+const { validatePassword } = require('../../utils/validation');
 
 const handleResetPassword = async (req, res) => {
     try {
@@ -11,6 +12,13 @@ const handleResetPassword = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: 'Email, OTP and new password are required'
+            });
+        }
+
+        if (!validatePassword(newPassword)) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters and contain uppercase, lowercase, numbers and special characters"
             });
         }
 

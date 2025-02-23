@@ -10,7 +10,7 @@ const { handleLogout } = require("../auth/logout");
 router.post("/signin", handleSignin);
 router.post("/signup", handleSignup);
 router.post("/reset-password", generateOtp);
-router.post("/reset-password/verify", handleResetPassword);
+router.post("/new-password", handleResetPassword);
 router.get("/verify", verifyToken, (req, res) => {
   res.json({
     success: true,
