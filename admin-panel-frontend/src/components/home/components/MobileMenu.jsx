@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAdminProfile } from '../../../context/AdminProfileContext';
 import { truncateString } from '../../../utils/stringUtils';
 import avatar from '/avatar.png';
@@ -6,6 +6,7 @@ import avatar from '/avatar.png';
 export default function MobileMenu({ isOpen }) {
   const { adminProfile } = useAdminProfile();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isActive = (path) => location.pathname === path;
 
@@ -81,7 +82,9 @@ export default function MobileMenu({ isOpen }) {
         </Link>
 
         {/* Host New Event Button */}
-        <button className="w-full mt-4 px-3 py-2 text-left rounded-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 flex items-center">
+        <button
+         onClick={()=> navigate('/events/create')}
+         className="w-full mt-4 px-3 py-2 text-left rounded-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 flex items-center">
           <svg className="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>

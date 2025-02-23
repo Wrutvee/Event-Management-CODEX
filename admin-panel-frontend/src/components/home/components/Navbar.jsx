@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import MobileMenu from './MobileMenu';
 import ProfileDropdown from './ProfileDropdown';
 import HamburgerButton from './HamburgerButton';
@@ -7,7 +7,8 @@ import HamburgerButton from './HamburgerButton';
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-
+  const navigate = useNavigate();
+  
   const isActive = (path) => location.pathname === path;
 
   return (
@@ -79,7 +80,9 @@ export default function Navbar() {
 
             {/* Right Section */}
             <div className="flex items-center md:space-x-2 lg:space-x-4">
-              <button className="hidden md:inline-flex items-center px-2 lg:px-4 py-2 border border-transparent rounded-md shadow-sm text-xs lg:text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+              <button 
+               onClick={()=> navigate('/events/create')}
+               className="hidden md:inline-flex items-center px-2 lg:px-4 py-2 border border-transparent rounded-md shadow-sm text-xs lg:text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
                 <svg className="mr-1.5 lg:mr-2 h-4 lg:h-5 w-4 lg:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>

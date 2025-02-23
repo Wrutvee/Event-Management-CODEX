@@ -21,7 +21,7 @@ export default function PasswordReset() {
     
     try {
       await fetchCsrfToken();
-      const response = await fetch('http://localhost:3000/auth/reset-password', {
+      const response = await fetch(`${import.meta.env.VITE_BASE_API_URL}/auth/reset-password`, {
         method: 'POST',
         headers: addCsrfToken({
           'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ export default function PasswordReset() {
 
     try {
       await fetchCsrfToken();
-      const response = await fetch('http://localhost:3000/auth/new-password', {
+      const response = await fetch(`${import.meta.env.VITE_BASE_API_URL}/auth/new-password`, {
         method: 'POST',
         headers: addCsrfToken({
           'Content-Type': 'application/json',

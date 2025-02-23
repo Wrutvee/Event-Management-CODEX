@@ -6,6 +6,7 @@ const csrf = require('csurf');
 
 const authRoutes = require("./routes/auth");
 const connectDB = require("./config/db");
+const eventRoutes = require("./routes/events");
 
 // Connect to MongoDB
 connectDB();
@@ -13,9 +14,25 @@ connectDB();
 const app = express();
 
 // Middleware to enable CORS
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://192.168.29.21:5173",
+  "http://192.168.29.50:5173",
+];
 app.use(
   cors({
-    origin: "http://localhost:5175", // Allow only this origin
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    }, // Allow only this origin
     methods: ["GET", "POST"], // Allow only specific methods
     credentials: true, // Allow cookies and authentication headers
   })
@@ -56,6 +73,7 @@ app.get('/csrf-token', (req, res) => {
 
 // Auth routes
 app.use("/auth", authRoutes);
+app.use("/events", eventRoutes);
 
 app.listen(3000, () => {
   console.log("server started");
