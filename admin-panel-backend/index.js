@@ -32,9 +32,9 @@ app.use(
       } else {
         callback(new Error("Not allowed by CORS"));
       }
-    }, // Allow only this origin
-    methods: ["GET", "POST"], // Allow only specific methods
-    credentials: true, // Allow cookies and authentication headers
+    }, 
+    methods: ["GET", "POST"], 
+    credentials: true, 
   })
 );
 
@@ -45,14 +45,17 @@ app.use(cookieParser());
 app.use(express.json());
 
 // CSRF protection
-app.use(csrf({
-  cookie: {
-    key: 'XSRF-TOKEN',
-    httpOnly: false, // Frontend needs to read it
-    sameSite: 'strict',
-    secure: process.env.NODE_ENV === 'production'
-  }
-}));
+app.use(
+  csrf({
+    cookie: {
+      key: "XSRF-TOKEN",
+      httpOnly: false, // Frontend needs to read it
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    },
+    value: (req) => req.headers["x-csrf-token"],
+  })
+);
 
 // Error handler for CSRF token errors
 app.use((err, req, res, next) => {

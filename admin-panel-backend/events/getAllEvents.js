@@ -3,7 +3,7 @@ const Event = require("../models/Event");
 const getAllEvents = async (req, res) => {
     try {
         const currentDate = new Date();
-        const limit = 5;
+        const limit = 10;
         let response = {
             success: true,
             upcoming: { events: [], total: 0 },
