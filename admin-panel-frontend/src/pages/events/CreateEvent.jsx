@@ -2,7 +2,7 @@ import { addCsrfToken, fetchCsrfToken } from "../../utils/csrf";
 import { useAdminProfile } from "../../context/AdminProfileContext";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import Navbar from "../home/components/Navbar";
+import Navbar from "../../components/navbar/Navbar";
 import { Dashboard } from "@uppy/react";
 import Uppy from "@uppy/core";
 

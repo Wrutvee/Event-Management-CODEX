@@ -26,7 +26,7 @@ export const addCsrfToken = (headers = {}) => {
   if (csrfToken) {
     return {
       ...headers,
-      'X-CSRF-TOKEN': csrfToken
+      "x-csrf-token": csrfToken, // Changed from CSRF-TOKEN to x-csrf-token
     };
   }
   return headers;

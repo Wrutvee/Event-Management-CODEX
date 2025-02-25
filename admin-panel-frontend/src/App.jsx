@@ -1,38 +1,37 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-// import SignIn from './components/auth/SignIn';
-// import SignupPage from './components/auth/SignUp';
-// import PasswordReset from './components/auth/PasswordReset';
-// import Home from './components/home/Home';
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { CsrfProvider } from './context/CsrfContext';
 import { AdminProfileProvider } from './context/AdminProfileContext';
-// import CreateEvent from './components/events/CreateEvent';
 import { EventsProvider } from './context/EventsContext';
 import { Suspense, lazy } from 'react';
+import PageLoader from "./components/common/PageLoader";
 
-const SignIn = lazy(() => import("./components/auth/SignIn"));
-const SignUp = lazy(() => import("./components/auth/SignUp"));
-const PasswordReset = lazy(() => import("./components/auth/PasswordReset"));
-const Home = lazy(() => import("./components/home/Home"));
-const CreateEvent = lazy(() => import("./components/events/CreateEvent"));
+const SignIn = lazy(() => import("./pages/auth/SignIn"));
+const SignUp = lazy(() => import("./pages/auth/SignUp"));
+const PasswordReset = lazy(() => import("./pages/auth/PasswordReset"));
+const Home = lazy(() => import("./pages/home/Home"));
+const CreateEvent = lazy(() => import("./pages/events/CreateEvent"));
 
-const LoadingFallback = () => (
-  <div className="flex justify-center items-center min-h-screen">
-    <div className="dots-loader" />
-  </div>
-);
+const CreateEventWrapper = () => {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <CreateEvent />
+    </Suspense>
+  );
+};
 
-function App() { 
+
+function App() {
   return (
     <CsrfProvider>
       <AdminProfileProvider>
         <EventsProvider>
           <BrowserRouter>
-            <Suspense fallback={<LoadingFallback />}>
+            <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route
                   path="/"
-                  element={<h1 className="text-red-100">Users Panel</h1>}
+                  element={<></>}
                 />
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/signup" element={<SignUp />} />
@@ -49,7 +48,7 @@ function App() {
                   path='/events/create'
                   element={
                     <ProtectedRoute>
-                      <CreateEvent />
+                      <CreateEventWrapper />
                     </ProtectedRoute>
                   }
                 />

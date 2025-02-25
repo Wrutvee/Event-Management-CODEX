@@ -1,21 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvents } from '../../context/EventsContext';
-import Navbar from './components/Navbar';
-import EventsHeader from './components/EventsHeader';
-import EventsGrid from './components/EventsGrid';
+import Navbar from '../../components/navbar/Navbar';
+import EventsHeader from '../../layout/home/EventsHeader';
+import EventsGrid from '../../layout/home/EventsGrid';
+import PageLoader from '../../components/common/PageLoader';
 
 export default function Home() {
   const [activeView, setActiveView] = useState('My Events');
   const navigate = useNavigate();
-  const { eventsData, isLoading, error, fetchAllEvents } = useEvents();
+  const { eventsData, isLoading, error, fetchAllEvents, isDataStale } = useEvents();
 
+  // Initial fetch on mount or when data is stale
   useEffect(() => {
     fetchAllEvents();
   }, []);
 
+  // Background refresh when component becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && isDataStale()) {
+        fetchAllEvents(true);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchAllEvents, isDataStale]);
+
   // Get the correct events array based on active view with safe access
-  const getCurrentEvents = () => {
+  const getCurrentEvents = useCallback(() => {
     if (!eventsData) return [];
     
     switch (activeView) {
@@ -28,7 +44,7 @@ export default function Home() {
       default:
         return [];
     }
-  };
+  }, [eventsData, activeView]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -37,21 +53,11 @@ export default function Home() {
       <main className="pt-20 pb-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <EventsHeader activeView={activeView} setActiveView={setActiveView} />
         
-        {isLoading && (
-          <div className="flex justify-center py-12">
-            <div className="dots-loader" />
-          </div>
-        )}
-
-        {error && (
-          <div className="text-red-600 text-center py-12">
-            {error}
-          </div>
-        )}
-
-        {!isLoading && !error && (
-          <EventsGrid events={getCurrentEvents()} />
-        )}
+        <EventsGrid 
+          events={getCurrentEvents()} 
+          isLoading={isLoading}
+          error={error}
+        />
         
         {/* Mobile FAB */}
         <button

@@ -1,0 +1,24 @@
+{
+  "folders": [
+    {
+      "path": "admin-panel-frontend"
+    },
+    {
+      "path": "admin-panel-backend"
+    },
+    {
+      "path": "users-panel-frontend"
+    },
+    {
+      "path": "users-panel-backend"
+    }
+  ],
+  "settings": {
+    "github.copilot.enable": {
+      "*": true
+    },
+    "github.copilot.advanced": {
+      "createWorkspaceRemoteIndex": true
+    }
+  }
+}

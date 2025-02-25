@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 import { fetchCsrfToken, addCsrfToken } from '../utils/csrf';
 
 const EventsContext = createContext();
@@ -20,10 +20,24 @@ export function EventsProvider({ children }) {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [lastFetchTime, setLastFetchTime] = useState(null);
 
-  const fetchAllEvents = async () => {
+  // Add function to check if data is stale (older than 1 minute)
+  const isDataStale = useCallback(() => {
+    if (!lastFetchTime) return true;
+    const staleDuration = 60 * 1000; // 1 minute
+    return Date.now() - lastFetchTime > staleDuration;
+  }, [lastFetchTime]);
+
+  const fetchAllEvents = useCallback(async (force = false) => {
+    // If data is fresh and not forced, return early
+    if (!force && !isDataStale()) {
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
+    
     try {
       await fetchCsrfToken();
       const response = await fetch(
@@ -44,16 +58,17 @@ export function EventsProvider({ children }) {
         past: data.past,
         myEvents: data.myEvents
       });
+      setLastFetchTime(Date.now());
     } catch (error) {
       setError(error.message);
       console.error('Fetch events error:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isDataStale]);
 
   // Function to load more events for a specific category
-  const loadMore = async (category, page = 2, limit = 5) => {
+  const loadMore = async (category, page = 2, limit = 10) => {
     setIsLoading(true);
     try {
       await fetchCsrfToken();
@@ -100,7 +115,8 @@ export function EventsProvider({ children }) {
         isLoading, 
         error,
         fetchAllEvents,
-        loadMore
+        loadMore,
+        isDataStale
       }}
     >
       {children}

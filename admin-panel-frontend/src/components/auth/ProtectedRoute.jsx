@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { addCsrfToken, fetchCsrfToken } from '../../utils/csrf';
 import { useAdminProfile } from '../../context/AdminProfileContext';
+import PageLoader from '../common/PageLoader';
 
 export default function ProtectedRoute({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -44,7 +45,7 @@ export default function ProtectedRoute({ children }) {
   }, []); // Remove updateProfile from dependencies
 
   if (isAuthenticated === null) {
-    return <div>Loading...</div>;
+    return <div className='flex justify-center py-12'><PageLoader /></div>;
   }
 
   return isAuthenticated ? children : <Navigate to="/signin" />;
