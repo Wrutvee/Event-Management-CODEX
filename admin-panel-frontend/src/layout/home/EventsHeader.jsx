@@ -1,7 +1,6 @@
 export default function EventsHeader({ activeView, setActiveView }) {
   return (
-    <div className="mb-8">
-      
+    <div>
       <div className="flex justify-center space-x-4">
         {['My Events', 'Upcoming', 'Past'].map((view) => (
           <button

@@ -6,11 +6,12 @@ import { EventsProvider } from './context/EventsContext';
 import { Suspense, lazy } from 'react';
 import PageLoader from "./components/common/PageLoader";
 
-const SignIn = lazy(() => import("./pages/auth/SignIn"));
-const SignUp = lazy(() => import("./pages/auth/SignUp"));
-const PasswordReset = lazy(() => import("./pages/auth/PasswordReset"));
+const SignInComponent = lazy(() => import("./pages/auth/SignIn"));
+const SignUpComponent = lazy(() => import("./pages/auth/SignUp"));
+const PasswordResetComponent = lazy(() => import("./pages/auth/PasswordReset"));
 const Home = lazy(() => import("./pages/home/Home"));
 const CreateEvent = lazy(() => import("./pages/events/CreateEvent"));
+const InviteAdminsComponent = lazy(() => import("./pages/inviteAdmins/InviteAdmins"));
 
 const CreateEventWrapper = () => {
   return (
@@ -20,6 +21,37 @@ const CreateEventWrapper = () => {
   );
 };
 
+const SignIn = () => {
+  return(
+    <Suspense fallback={<PageLoader />}>
+      <SignInComponent />
+    </Suspense>
+  )
+};
+
+const PasswordReset = () => {
+  return(
+    <Suspense fallback={ <PageLoader /> }>
+      <PasswordResetComponent />
+    </Suspense>
+  )
+};
+
+const SignUp = () => {
+  return(
+    <Suspense fallback= { <PageLoader /> }>
+      <SignUpComponent />
+    </Suspense>
+  )
+}
+
+const InviteAdmins = () => {
+  return(
+    <Suspense fallback = { <PageLoader /> }>
+      <InviteAdminsComponent />
+    </Suspense>
+  )
+}
 
 function App() {
   return (
@@ -49,6 +81,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <CreateEventWrapper />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/invite"
+                  element={
+                    <ProtectedRoute>
+                      <InviteAdmins />
                     </ProtectedRoute>
                   }
                 />

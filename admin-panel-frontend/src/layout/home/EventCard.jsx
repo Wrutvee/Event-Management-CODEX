@@ -65,8 +65,8 @@ export default function EventCard({ event }) {
   const canEdit = () => {
     if (adminProfile.role === "superadmin") return true;
     return (
-      event.organizer.createdBy === adminProfile._id ||
-      event.organizer.managedBy.includes(adminProfile._id)
+      event.organizer.createdBy._id === adminProfile.id ||
+      event.organizer.managedBy.includes(adminProfile.id)
     );
   };
 
