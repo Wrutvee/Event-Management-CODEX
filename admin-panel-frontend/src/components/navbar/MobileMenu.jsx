@@ -22,7 +22,7 @@ export default function MobileMenu({ isOpen }) {
     <div
       className={`fixed inset-y-0 left-0 transform ${
         isOpen ? "translate-x-0" : "-translate-x-full"
-      } w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out md:hidden z-50`}
+      } w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out md:hidden z-60`}
     >
       {/* Profile Section */}
       <div className="p-4 border-b">

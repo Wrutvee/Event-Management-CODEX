@@ -1,6 +1,19 @@
-const validateEventInput = (eventData) => {
+const validateEventInput = (eventData, mode = 'create') => {
     const errors = [];
     const now = new Date();
+
+    // Add cover photo validation if needed
+    if (eventData.coverPhoto && typeof eventData.coverPhoto !== 'string') {
+        errors.push("Cover photo must be a valid URL");
+    }
+
+    // Check if event has started when editing
+    if (mode === 'edit') {
+        const startDate = new Date(eventData.dateTime.start);
+        if (startDate <= now) {
+            errors.push("Cannot edit an event that has already started");
+        }
+    }
 
     // Basic Event Information
     if (!eventData.title?.trim()) errors.push("Event title is required");

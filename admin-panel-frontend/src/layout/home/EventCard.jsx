@@ -3,6 +3,7 @@ import placeholder from '/logos/main_logo.png';
 import { MapPin, Calendar, Clock, Edit, Eye, Globe } from "lucide-react";
 import { useState, useEffect } from 'react';
 import './EventCard.css';
+import { useNavigate } from 'react-router-dom';
 
 // Create a cache map outside component to persist across renders
 export const imageCache = new Map();
@@ -11,7 +12,12 @@ export default function EventCard({ event }) {
   const { adminProfile } = useAdminProfile();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [fallbackImage, setFallbackImage] = useState(false);
-  const imageUrl = event.mediaLinks?.[0] || placeholder;
+  // Update to use coverPhoto first, then fallback to mediaLinks[0], then placeholder
+  const imageUrl = event.coverPhoto || event.mediaLinks?.[0] || placeholder;
+  const navigate = useNavigate();
+  
+  const eventStartDate = new Date(event.dateTime.start);
+  const now = new Date();
 
   // Check if image is already cached on mount
   useEffect(() => {
@@ -63,7 +69,16 @@ export default function EventCard({ event }) {
   };
 
   const canEdit = () => {
-    if (!adminProfile) return false; // Add this check
+    if (!adminProfile) return false;
+    
+    // Check if event has started
+    const eventStartDate = new Date(event.dateTime.start);
+    const now = new Date();
+    if (eventStartDate <= now) {
+      return false;
+    }
+
+    // Check admin permissions
     if (adminProfile.role === "superadmin") return true;
     return (
       event.organizer.createdBy._id === adminProfile.id ||
@@ -144,12 +159,23 @@ export default function EventCard({ event }) {
 
           {/* Action Buttons */}
           <div className="flex flex-col gap-2">
-            {canEdit() && (
-              <button className="w-full px-4 py-2.5 text-[0.75rem] font-bold text-indigo-600 bg-white border border-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors flex items-center justify-center gap-1">
+            {canEdit() ? (
+              <button 
+                onClick={() => navigate(`/events/edit/${event._id}`)}
+                className="w-full px-4 py-2.5 text-[0.75rem] font-bold text-indigo-600 bg-white border border-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors flex items-center justify-center gap-1"
+              >
                 <Edit className="w-3 h-3" />
                 Edit Event
               </button>
-            )}
+            ) : eventStartDate <= now ? (
+              <button 
+                disabled
+                className="w-full px-4 py-2.5 text-[0.75rem] font-bold text-gray-500 bg-gray-100 border border-gray-300 rounded-lg cursor-not-allowed flex items-center justify-center gap-1"
+              >
+                <Clock className="w-3 h-3" />
+                Event Started
+              </button>
+            ) : null}
             <button className="w-full px-4 py-2.5 text-[0.75rem] font-bold text-white bg-indigo-600 border border-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-[0_2px_24px_0_rgba(0,0,0,0.06)] flex items-center justify-center gap-1">
               <Eye className="w-3 h-3" />
               View Details

@@ -4,7 +4,9 @@ const { createEvent } = require('../events/createEvent');
 const { getMyEvents } = require('../events/getMyEvents');
 const { getUpcomingEvents } = require('../events/getUpcomingEvents');
 const { getPastEvents } = require('../events/getPastEvents');
-const { getAllEvents } = require('../events/getAllEvents')
+const { getAllEvents } = require('../events/getAllEvents');
+const { getEventById } = require("../events/getEventById");
+const { updateEvent } = require("../events/updateEvent");
 const { verifyToken } = require('../auth/verify');
 
 router.post('/create', verifyToken, createEvent);
@@ -22,5 +24,20 @@ router.get(
     }
   }, getAllEvents
 );
+
+router.get(
+  "/:eventId",
+  (req, res, next) => {
+    // Optional authentication for private events
+    if (req.cookies.token) {
+      verifyToken(req, res, next);
+    } else {
+      next();
+    }
+  },
+  getEventById
+);
+
+router.put("/update/:eventId", verifyToken, updateEvent);
 
 module.exports = router;

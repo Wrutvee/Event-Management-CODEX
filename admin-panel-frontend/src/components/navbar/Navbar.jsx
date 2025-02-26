@@ -161,7 +161,7 @@ export default function Navbar() {
       {/* Mobile Menu Overlay */}
       <div
         className={`fixed inset-0 bg-gray-900 transition-opacity duration-300 md:hidden ${
-          isMenuOpen ? "opacity-50 z-40" : "opacity-0 pointer-events-none"
+          isMenuOpen ? "opacity-50 z-[55]" : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setIsMenuOpen(false)}
         aria-hidden="true"

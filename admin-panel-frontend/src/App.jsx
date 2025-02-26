@@ -12,6 +12,7 @@ const PasswordResetComponent = lazy(() => import("./pages/auth/PasswordReset"));
 const Home = lazy(() => import("./pages/home/Home"));
 const CreateEvent = lazy(() => import("./pages/events/CreateEvent"));
 const InviteAdminsComponent = lazy(() => import("./pages/inviteAdmins/InviteAdmins"));
+const EditEvent = lazy(() => import("./pages/events/EditEvent"));
 
 const CreateEventWrapper = () => {
   return (
@@ -89,6 +90,16 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <InviteAdmins />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/events/edit/:eventId"
+                  element={
+                    <ProtectedRoute>
+                      <Suspense fallback={<PageLoader />}>
+                        <EditEvent />
+                      </Suspense>
                     </ProtectedRoute>
                   }
                 />
