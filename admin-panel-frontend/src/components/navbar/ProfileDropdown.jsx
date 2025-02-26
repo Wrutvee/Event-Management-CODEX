@@ -4,12 +4,15 @@ import { addCsrfToken, fetchCsrfToken, invalidateToken } from '../../utils/csrf'
 import { useAdminProfile } from '../../context/AdminProfileContext';
 import { truncateString } from '../../utils/stringUtils';
 import avatar from '/avatar.png';
+import { imageCache } from '../../layout/home/EventCard';
+import { useEvents } from "../../context/EventsContext";
 
 export default function ProfileDropdown() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { adminProfile, clearProfile } = useAdminProfile();
+  const { resetEvents } = useEvents();
 
   const handleLogout = async () => {
     setIsLoading(true);
@@ -24,7 +27,9 @@ export default function ProfileDropdown() {
       if (response.ok) {
         invalidateToken();
         clearProfile();
-        navigate('/signin');
+        imageCache.clear();
+        resetEvents();
+        navigate('/signin', { replace: true }); // Add replace: true
       } else {
         console.error('Logout failed');
       }

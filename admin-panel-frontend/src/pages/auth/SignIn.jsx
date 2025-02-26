@@ -73,7 +73,8 @@ export default function LoginPage() {
         throw new Error(data.message || 'Login failed');
       }
 
-      navigate('/home');
+      await updateProfile(data.user);
+      navigate("/home", { replace: true });
     } catch (error) {
       setError(error.message || 'Error during signin');
     } finally {

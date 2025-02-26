@@ -108,6 +108,16 @@ export function EventsProvider({ children }) {
     }
   };
 
+  const resetEvents = useCallback(() => {
+    setEventsData({
+      upcoming: { events: [], total: 0, hasMore: false },
+      past: { events: [], total: 0, hasMore: false },
+      myEvents: { events: [], total: 0, hasMore: false },
+    });
+    setLastFetchTime(null);
+    setError(null);
+  }, []);
+
   return (
     <EventsContext.Provider 
       value={{ 
@@ -116,7 +126,8 @@ export function EventsProvider({ children }) {
         error,
         fetchAllEvents,
         loadMore,
-        isDataStale
+        isDataStale,
+        resetEvents
       }}
     >
       {children}

@@ -147,6 +147,7 @@ export default function PasswordReset() {
               <input
                 type="text"
                 maxLength="6"
+                autoComplete="otp"
                 className="mt-1 flex-1 p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                 placeholder="Enter 6-digit OTP"
                 value={otp}

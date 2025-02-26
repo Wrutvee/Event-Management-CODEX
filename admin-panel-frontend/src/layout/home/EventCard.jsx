@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import './EventCard.css';
 
 // Create a cache map outside component to persist across renders
-const imageCache = new Map();
+export const imageCache = new Map();
 
 export default function EventCard({ event }) {
   const { adminProfile } = useAdminProfile();
@@ -63,6 +63,7 @@ export default function EventCard({ event }) {
   };
 
   const canEdit = () => {
+    if (!adminProfile) return false; // Add this check
     if (adminProfile.role === "superadmin") return true;
     return (
       event.organizer.createdBy._id === adminProfile.id ||
