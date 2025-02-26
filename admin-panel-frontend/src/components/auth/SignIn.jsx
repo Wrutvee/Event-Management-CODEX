@@ -8,20 +8,23 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setIsLoading(true);
 
     if (!email || !password) {
       setError('Email and password are required');
+      setIsLoading(false);
       return;
     }
 
     try {
       await fetchCsrfToken();
       
-      const response = await fetch('http://localhost:3000/auth/signin', {
+      const response = await fetch(`${import.meta.env.VITE_BASE_API_URL}/auth/signin`, {
         method: 'POST',
         headers: addCsrfToken({
           'Content-Type': 'application/json',
@@ -36,10 +39,11 @@ export default function LoginPage() {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Redirect to dashboard or home page
       navigate('/home');
     } catch (error) {
       setError(error.message || 'Error during signin');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -99,9 +103,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full mt-6 bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition"
+            disabled={isLoading}
+            className="w-full mt-6 bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition disabled:bg-blue-400"
           >
-            Login
+            {isLoading ? <div className="dots-loader" /> : 'Login'}
           </button>
         </form>
       </div>

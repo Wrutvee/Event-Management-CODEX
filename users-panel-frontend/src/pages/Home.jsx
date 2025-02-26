@@ -1,61 +1,203 @@
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import Header from '../components/Header';
+import EventCard from '../components/EventCard';
 
 function Home() {
-  const navigate = useNavigate()
+  const [activeTab, setActiveTab] = useState('upcoming');
+  const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
+  const plusButtonRef = useRef(null);
+  
+  // Sample event data categorized by type
+  const eventsByType = {
+    my: [
+      {
+        id: 1,
+        title: 'My Tech Workshop',
+        description: 'Workshop on React Development',
+        date: '2024-03-10',
+        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87',
+        isRegistered: true
+      },
+      {
+        id: 2,
+        title: 'Local Meetup',
+        description: 'Monthly Developer Meetup',
+        date: '2024-03-20',
+        image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea',
+        isRegistered: true
+      }
+    ],
+    upcoming: [
+      {
+        id: 3,
+        title: 'Tech Conference 2024',
+        description: 'Join us for the biggest tech conference',
+        date: '2024-04-15',
+        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87',
+        isRegistered: false
+      },
+      {
+        id: 4,
+        title: 'Music Festival',
+        description: 'Experience amazing live performances',
+        date: '2024-04-01',
+        image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea',
+        isRegistered: false
+      }
+    ],
+    past: [
+      {
+        id: 5,
+        title: 'Code Summit 2023',
+        description: 'Past coding conference',
+        date: '2023-12-15',
+        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87',
+        isRegistered: true
+      },
+      {
+        id: 6,
+        title: 'Winter Hackathon',
+        description: 'Previous hackathon event',
+        date: '2023-11-30',
+        image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea',
+        isRegistered: true
+      }
+    ]
+  };
 
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated')
-    localStorage.removeItem('user')
-    navigate('/login', { replace: true })
-  }
+  // Get events based on active tab
+  const currentEvents = eventsByType[activeTab] || [];
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (plusButtonRef.current && !plusButtonRef.current.contains(event.target)) {
+        setIsPlusMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
-    <div className="min-h-screen w-full bg-gray-100">
-      <nav className="bg-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex-shrink-0 flex items-center">
-              <h1 className="text-lg sm:text-xl font-bold text-gray-800">Event Management</h1>
-            </div>
-            <div className="flex items-center">
-              <button
-                onClick={handleLogout}
-                className="ml-2 sm:ml-4 px-3 sm:px-4 py-2 rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto py-4 sm:py-6">
-        <div className="px-2 sm:px-4 lg:px-8">
-          <div className="border-4 border-dashed border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-center">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">Welcome to Event Management</h2>
-              <p className="text-sm sm:text-base text-gray-600">
-                This is your dashboard where you can manage your events.
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 relative animate-gradient-x">
+      <Header />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
+        <div className="flex gap-8">
+          <main className="flex-1">
+            <div className="mb-8 transform transition-all duration-500 hover:scale-[1.01]">
+              <h1 className="text-3xl font-bold text-gray-900 animate-slideDown">
+                {activeTab === 'my' ? 'My Events' :
+                 activeTab === 'upcoming' ? 'Upcoming Events' :
+                 'Past Events'}
+              </h1>
+              <p className="mt-2 text-gray-600 animate-slideUp">
+                {activeTab === 'my' ? 'Events you are registered for' :
+                 activeTab === 'upcoming' ? 'Discover and join amazing events' :
+                 'Previous events'}
               </p>
             </div>
-            
-            <div className="mt-6 sm:mt-8 grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {/* Example card */}
-              <div className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow">
-                <div className="px-4 py-5 sm:p-6">
-                  <h3 className="text-base sm:text-lg font-medium text-gray-900">Upcoming Events</h3>
-                  <p className="mt-1 text-sm text-gray-600">
-                    View and manage your upcoming events
-                  </p>
-                </div>
-              </div>
+
+            <div className="mb-8">
+              <nav className="flex space-x-8">
+                {['my', 'upcoming', 'past'].map((tab, index) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`
+                      whitespace-nowrap py-3 px-6 text-base font-semibold rounded-md
+                      transition-all duration-300 transform hover:scale-105
+                      animate-fadeIn
+                      ${activeTab === tab 
+                        ? 'bg-indigo-600 text-white shadow-lg hover:bg-indigo-700'
+                        : 'bg-gray-900 text-white hover:bg-gray-800'
+                      }
+                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                    `}
+                    style={{
+                      animationDelay: `${index * 150}ms`
+                    }}
+                  >
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)} Events
+                  </button>
+                ))}
+              </nav>
             </div>
-          </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {currentEvents.map((event, index) => (
+                <div 
+                  key={event.id}
+                  className="animate-fadeIn transform transition-all duration-300 hover:scale-[1.02]"
+                  style={{
+                    animationDelay: `${index * 100}ms`
+                  }}
+                >
+                  <EventCard event={event} />
+                </div>
+              ))}
+            </div>
+          </main>
         </div>
-      </main>
+      </div>
+
+      {/* Plus Button with Enhanced Animations and Click Outside */}
+      <div className="fixed bottom-8 right-8 z-50 animate-bounce-slow" ref={plusButtonRef}>
+        <div className="relative">
+          <button
+            onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
+            className="w-14 h-14 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-lg 
+              hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 
+              transition-all duration-300 transform hover:scale-110 
+              hover:rotate-180 hover:shadow-xl overflow-hidden"
+          >
+            <svg
+              className={`h-44 w-44 transition-transform duration-300 ease-in-out ${
+                isPlusMenuOpen ? 'rotate-45 scale-110' : ''
+              }`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={3}
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
+            </svg>
+          </button>
+
+          {isPlusMenuOpen && (
+            <div 
+              className="absolute bottom-full right-0 mb-4 w-48 bg-white rounded-lg shadow-xl py-2 border border-gray-100
+                animate-slideUpFade transform origin-bottom"
+            >
+              <Link
+                to="/certificates"
+                className="block px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 transition-colors duration-150 
+                  first:rounded-t-lg transform hover:translate-x-2"
+              >
+                Certificates
+              </Link>
+              <Link
+                to="/help"
+                className="block px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 transition-colors duration-150 
+                  last:rounded-b-lg transform hover:translate-x-2"
+              >
+                Help
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
-  )
+  );
 }
 
-export default Home
+export default Home;
