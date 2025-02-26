@@ -6,7 +6,7 @@ const { getUpcomingEvents } = require('../events/getUpcomingEvents');
 const { getPastEvents } = require('../events/getPastEvents');
 const { getAllEvents } = require('../events/getAllEvents');
 const { getEventById } = require("../events/getEventById");
-const { updateEvent } = require("../events/updateEvent");
+const { updateEvent } = require("../events/updateEvents");
 const { verifyToken } = require('../auth/verify');
 
 router.post('/create', verifyToken, createEvent);

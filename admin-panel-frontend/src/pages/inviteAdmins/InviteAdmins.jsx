@@ -212,7 +212,7 @@ export default function InviteAdmins() {
                   type="text"
                   readOnly
                   value={inviteLink}
-                  className="block w-full pr-24 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="block h-8 border px-4 md:px-8 w-full pr-24 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
                 <button
                   onClick={copyToClipboard}

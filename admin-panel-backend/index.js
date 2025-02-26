@@ -8,6 +8,7 @@ const authRoutes = require("./routes/auth");
 const connectDB = require("./config/db");
 const eventRoutes = require("./routes/events");
 const inviteRoutes = require("./routes/inviteAdmins");
+const profileRoutes = require("./routes/profile");
 
 // Connect to MongoDB
 connectDB();
@@ -34,7 +35,7 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     }, 
-    methods: ["GET", "POST", "DELETE"], 
+    methods: ["GET", "POST", "DELETE", "PUT"], 
     credentials: true, 
   })
 );
@@ -79,6 +80,7 @@ app.get('/csrf-token', (req, res) => {
 app.use("/auth", authRoutes);
 app.use("/events", eventRoutes);
 app.use("/invite", inviteRoutes);
+app.use("/profile", profileRoutes);
 
 app.listen(3000, () => {
   console.log("server started");

@@ -26,7 +26,7 @@ chmod +x start.sh
  ## Admin panel frontend :
   ~~- Add loading animation in signin, signup, forgot pass pages~~
   ~~- create invitation of admin or superadmin page~~
-  - create profile page
+  ~~- create profile page~~
   - features to edit profile page
 
  ## Admin panel backend :

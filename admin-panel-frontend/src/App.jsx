@@ -13,6 +13,7 @@ const Home = lazy(() => import("./pages/home/Home"));
 const CreateEvent = lazy(() => import("./pages/events/CreateEvent"));
 const InviteAdminsComponent = lazy(() => import("./pages/inviteAdmins/InviteAdmins"));
 const EditEvent = lazy(() => import("./pages/events/EditEvent"));
+const Profile = lazy(() => import("./pages/profile/Profile"));
 
 const CreateEventWrapper = () => {
   return (
@@ -62,10 +63,7 @@ function App() {
           <BrowserRouter>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                <Route
-                  path="/"
-                  element={<></>}
-                />
+                <Route path="/" element={<></>} />
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/forgot-password" element={<PasswordReset />} />
@@ -78,7 +76,7 @@ function App() {
                   }
                 />
                 <Route
-                  path='/events/create'
+                  path="/events/create"
                   element={
                     <ProtectedRoute>
                       <CreateEventWrapper />
@@ -99,6 +97,16 @@ function App() {
                     <ProtectedRoute>
                       <Suspense fallback={<PageLoader />}>
                         <EditEvent />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Suspense fallback={<PageLoader />}>
+                        <Profile />
                       </Suspense>
                     </ProtectedRoute>
                   }
