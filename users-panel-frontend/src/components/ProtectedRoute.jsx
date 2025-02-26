@@ -1,16 +1,21 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import authService from '../services/authService';
+import { useAuth } from '../context/AuthContext';
 
-const ProtectedRoute = ({ children }) => {
+function ProtectedRoute({ children }) {
+  const { user } = useAuth();
   const location = useLocation();
-  const isAuthenticated = authService.validateToken();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  console.log('ProtectedRoute - Current user:', user);
+  console.log('ProtectedRoute - Current location:', location);
+
+  if (!user) {
+    console.log('No user found, redirecting to login');
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  console.log('User authenticated, rendering protected content');
   return children;
-};
+}
 
 export default ProtectedRoute;

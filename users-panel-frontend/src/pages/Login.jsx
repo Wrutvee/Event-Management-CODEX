@@ -59,108 +59,113 @@ function Login() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="w-full max-w-md space-y-8"
-    >
-      <div>
-        <motion.h2 
-          initial={{ y: -20 }}
-          animate={{ y: 0 }}
-          className="text-2xl sm:text-3xl font-bold text-center"
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+     
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md space-y-8"
         >
-          Sign in to your account
-        </motion.h2>
-        <p className="mt-2 text-center text-gray-600">
-          Welcome back! Please enter your details.
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
-        <InputField
-          label="Email"
-          type="email"
-          {...register('email', { 
-            required: 'Email is required',
-            pattern: {
-              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: 'Invalid email address'
-            }
-          })}
-          error={errors.email}
-          icon="fas fa-envelope"
-          disabled={isLoading}
-        />
-
-        <InputField
-          label="Password"
-          type="password"
-          {...register('password', { 
-            required: 'Password is required',
-            minLength: {
-              value: 8,
-              message: 'Password must be at least 8 characters'
-            }
-          })}
-          error={errors.password}
-          icon="fas fa-lock"
-          disabled={isLoading}
-        />
-
-        <div className="flex items-center justify-between">
-          <AnimatedCheckbox
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-          />
-          
-          <Link 
-            to="/forgot-password"
-            className="text-sm text-indigo-600 hover:text-indigo-500"
-          >
-            Forgot password?
-          </Link>
-        </div>
-
-        <Button 
-          type="submit" 
-          fullWidth
-          disabled={isLoading}
-          className="transition-transform hover:scale-105"
-        >
-          {isLoading ? (
-            <span className="flex items-center justify-center">
-              <i className="fas fa-spinner fa-spin mr-2" />
-              Signing in...
-            </span>
-          ) : 'Sign in'}
-        </Button>
-      </form>
-
-      <div className="mt-6">
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
+          <div>
+            <motion.h2 
+              initial={{ y: -20 }}
+              animate={{ y: 0 }}
+              className="text-2xl sm:text-3xl font-bold text-center"
+            >
+              Sign in to your account
+            </motion.h2>
+            <p className="mt-2 text-center text-gray-600">
+              Welcome back! Please enter your details.
+            </p>
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">Or continue with</span>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
+            <InputField
+              label="Email"
+              type="email"
+              {...register('email', { 
+                required: 'Email is required',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: 'Invalid email address'
+                }
+              })}
+              error={errors.email}
+              icon="fas fa-envelope"
+              disabled={isLoading}
+            />
+
+            <InputField
+              label="Password"
+              type="password"
+              {...register('password', { 
+                required: 'Password is required',
+                minLength: {
+                  value: 8,
+                  message: 'Password must be at least 8 characters'
+                }
+              })}
+              error={errors.password}
+              icon="fas fa-lock"
+              disabled={isLoading}
+            />
+
+            <div className="flex items-center justify-between">
+              <AnimatedCheckbox
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              
+              <Link 
+                to="/forgot-password"
+                className="text-sm text-indigo-600 hover:text-indigo-500"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
+            <Button 
+              type="submit" 
+              fullWidth
+              disabled={isLoading}
+              className="transition-transform hover:scale-105"
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center">
+                  <i className="fas fa-spinner fa-spin mr-2" />
+                  Signing in...
+                </span>
+              ) : 'Sign in'}
+            </Button>
+          </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              </div>
+            </div>
+
+            <SocialLogin />
+
+            <p className="mt-6 text-center text-sm text-gray-600">
+              Don't have an account?{' '}
+              <Link
+                to="/signup"
+                className="font-medium text-indigo-600 hover:text-indigo-500"
+              >
+                Sign up
+              </Link>
+            </p>
           </div>
-        </div>
-
-        <SocialLogin />
-
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Don't have an account?{' '}
-          <Link
-            to="/signup"
-            className="font-medium text-indigo-600 hover:text-indigo-500"
-          >
-            Sign up
-          </Link>
-        </p>
+        </motion.div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
