@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import Login from './pages/Login';
 import SignUp from './pages/Signup';
 import Home from './pages/Home';
+import Notifications from './pages/Notification';
 
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -16,6 +17,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/" element={<Navigate to="/home" replace />} />
         </Routes>
         <ToastContainer position="top-right" autoClose={3000} />

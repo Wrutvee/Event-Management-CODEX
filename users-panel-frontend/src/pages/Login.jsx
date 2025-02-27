@@ -81,10 +81,17 @@ function Login() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
+          <form 
+            onSubmit={handleSubmit(onSubmit)} 
+            className="mt-8 space-y-6"
+            autoComplete="on"
+          >
+            <input type="hidden" name="remember" value="true" />
+            
             <InputField
               label="Email"
               type="email"
+              autoComplete="email"
               {...register('email', { 
                 required: 'Email is required',
                 pattern: {
@@ -100,6 +107,7 @@ function Login() {
             <InputField
               label="Password"
               type="password"
+              autoComplete="current-password"
               {...register('password', { 
                 required: 'Password is required',
                 minLength: {

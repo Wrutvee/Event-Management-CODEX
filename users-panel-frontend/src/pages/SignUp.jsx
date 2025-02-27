@@ -57,7 +57,11 @@ function SignUp() {
             </motion.p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
+          <form 
+            onSubmit={handleSubmit(onSubmit)} 
+            className="mt-8 space-y-6"
+            autoComplete="on"
+          >
             <motion.div
               initial={{ x: -20 }}
               animate={{ x: 0 }}
@@ -65,6 +69,7 @@ function SignUp() {
             >
               <InputField
                 label="Full Name"
+                autoComplete="name"
                 {...register('name', { 
                   required: 'Name is required',
                   minLength: {
@@ -79,6 +84,7 @@ function SignUp() {
               <InputField
                 label="Email"
                 type="email"
+                autoComplete="email"
                 {...register('email', { 
                   required: 'Email is required',
                   pattern: {
@@ -93,6 +99,7 @@ function SignUp() {
               <InputField
                 label="Password"
                 type="password"
+                autoComplete="new-password"
                 {...register('password', { 
                   required: 'Password is required',
                   minLength: {
@@ -107,6 +114,7 @@ function SignUp() {
               <InputField
                 label="Confirm Password"
                 type="password"
+                autoComplete="new-password"
                 {...register('confirmPassword', { 
                   required: 'Please confirm your password',
                   validate: value => value === password || 'Passwords do not match'

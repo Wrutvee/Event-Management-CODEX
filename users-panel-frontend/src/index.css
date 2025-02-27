@@ -127,3 +127,12 @@ textarea {
 }
 
 /* Your custom styles below */
+
+@layer components {
+  /* Responsive notification styles */
+  @media (max-width: 767px) {
+    .notification-page {
+      min-height: calc(100vh - 4rem);
+    }
+  }
+}
