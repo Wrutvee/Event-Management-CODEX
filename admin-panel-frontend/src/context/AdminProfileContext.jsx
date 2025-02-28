@@ -1,9 +1,16 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const AdminProfileContext = createContext();
 
 export function AdminProfileProvider({ children }) {
   const [adminProfile, setAdminProfile] = useState(null);
+
+  // Add cleanup effect
+  useEffect(() => {
+    return () => {
+      setAdminProfile(null);
+    };
+  }, []);
 
   const updateProfile = (userData) => {
     setAdminProfile(userData);

@@ -83,43 +83,54 @@ function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 relative animate-gradient-x">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
+      {/* Add backdrop overlay when menu is open */}
+      {isPlusMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-25 transition-opacity duration-200 z-40"
+          onClick={() => setIsPlusMenuOpen(false)}
+        />
+      )}
+
       <Header />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
-        <div className="flex gap-8">
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="flex flex-col gap-6">
           <main className="flex-1">
-            <div className="mb-8 transform transition-all duration-500 hover:scale-[1.01]">
-              <h1 className="text-3xl font-bold text-gray-900 animate-slideDown">
+            {/* Header Section */}
+            <div className="mb-4 sm:mb-8">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 animate-slideDown">
                 {activeTab === 'my' ? 'My Events' :
                  activeTab === 'upcoming' ? 'Upcoming Events' :
                  'Past Events'}
               </h1>
-              <p className="mt-2 text-gray-600 animate-slideUp">
+              <p className="mt-2 text-sm sm:text-base text-gray-600 animate-slideUp">
                 {activeTab === 'my' ? 'Events you are registered for' :
                  activeTab === 'upcoming' ? 'Discover and join amazing events' :
                  'Previous events'}
               </p>
             </div>
 
-            <div className="mb-8">
-              <nav className="flex space-x-8">
+            {/* Tabs Navigation */}
+            <div className="mb-6 sm:mb-8">
+              <nav className="flex space-x-4 sm:space-x-8">
                 {['my', 'upcoming', 'past'].map((tab, index) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     className={`
-                      whitespace-nowrap py-3 px-6 text-base font-semibold rounded-md
+                      whitespace-nowrap py-2 sm:py-3 px-4 sm:px-6 text-sm sm:text-base font-semibold rounde  d-md
                       transition-all duration-300 transform hover:scale-105
-                      animate-fadeIn
                       ${activeTab === tab 
                         ? 'bg-indigo-600 text-white shadow-lg hover:bg-indigo-700'
                         : 'bg-gray-900 text-white hover:bg-gray-800'
                       }
-                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                      focus:outline-none active:outline-none
                     `}
                     style={{
-                      animationDelay: `${index * 150}ms`
+                      animationDelay: `${index * 150}ms`,
+                      WebkitTapHighlightColor: 'transparent'
                     }}
                   >
                     {tab.charAt(0).toUpperCase() + tab.slice(1)} Events
@@ -128,7 +139,8 @@ function Home() {
               </nav>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* Events Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {currentEvents.map((event, index) => (
                 <div 
                   key={event.id}
@@ -145,56 +157,49 @@ function Home() {
         </div>
       </div>
 
-      {/* Plus Button with Enhanced Animations and Click Outside */}
-      <div className="fixed bottom-8 right-8 z-50 animate-bounce-slow" ref={plusButtonRef}>
-        <div className="relative">
-          <button
-            onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
-            className="w-14 h-14 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-lg 
-              hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 
-              transition-all duration-300 transform hover:scale-110 
-              hover:rotate-180 hover:shadow-xl overflow-hidden"
+      {/* Floating Action Button */}
+      <div 
+        className="fixed bottom-6 right-6 z-50 animate-float" 
+        ref={plusButtonRef}
+      >
+        <button
+          onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
+          className="w-14 h-14 sm:w-16 sm:h-16 bg-indigo-600 rounded-full flex items-center justify-center 
+          text-white shadow-xl hover:bg-indigo-700 focus:outline-none transition-all duration-300 
+          transform hover:scale-110"
+        >
+          <svg
+            className={`h-8 w-8 sm:h-10 sm:w-10 transition-transform duration-300 ${
+              isPlusMenuOpen ? 'rotate-45' : ''
+            }`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2.5} // Made the stroke thicker
           >
-            <svg
-              className={`h-44 w-44 transition-transform duration-300 ease-in-out ${
-                isPlusMenuOpen ? 'rotate-45 scale-110' : ''
-              }`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={3}
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
-          </button>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+            />
+          </svg>
+        </button>
 
-          {isPlusMenuOpen && (
-            <div 
-              className="absolute bottom-full right-0 mb-4 w-48 bg-white rounded-lg shadow-xl py-2 border border-gray-100
-                animate-slideUpFade transform origin-bottom"
-            >
+        {/* Floating Menu */}
+        {isPlusMenuOpen && (
+          <div className="absolute bottom-full right-0 mb-4 w-48 bg-white rounded-lg shadow-xl py-2 border border-gray-100">
+            {['certificates', 'help'].map((item) => (
               <Link
-                to="/certificates"
-                className="block px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 transition-colors duration-150 
-                  first:rounded-t-lg transform hover:translate-x-2"
+                key={item}
+                to={`/${item}`}
+                className="block px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 
+                  transition-all duration-150 capitalize transform hover:translate-x-2"
               >
-                Certificates
+                {item}
               </Link>
-              <Link
-                to="/help"
-                className="block px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 transition-colors duration-150 
-                  last:rounded-b-lg transform hover:translate-x-2"
-              >
-                Help
-              </Link>
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

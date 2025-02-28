@@ -1,38 +1,43 @@
 const express = require('express');
 const router = express.Router();
+const { createEvent } = require('../events/createEvent');
+const { getMyEvents } = require('../events/getMyEvents');
+const { getUpcomingEvents } = require('../events/getUpcomingEvents');
+const { getPastEvents } = require('../events/getPastEvents');
+const { getAllEvents } = require('../events/getAllEvents');
+const { getEventById } = require("../events/getEventById");
+const { updateEvent } = require("../events/updateEvents");
 const { verifyToken } = require('../auth/verify');
-const Event = require('../models/Event');
 
-router.post('/create', verifyToken, async (req, res) => {
-    try {
-        const eventData = req.body;
-        
-        // Add creator to organizer
-        eventData.organizer.createdBy = req.user.id;
-        
-        // Convert managedBy emails to Admin IDs
-        if (eventData.organizer.managedBy && eventData.organizer.managedBy.length > 0) {
-            const Admin = require('../models/Admin');
-            const adminEmails = eventData.organizer.managedBy;
-            const admins = await Admin.find({ email: { $in: adminEmails } });
-            eventData.organizer.managedBy = admins.map(admin => admin._id);
-        }
-
-        const event = new Event(eventData);
-        await event.save();
-
-        res.status(201).json({
-            success: true,
-            message: 'Event created successfully',
-            event: event
-        });
-    } catch (error) {
-        console.error('Event creation error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error creating event'
-        });
+router.post('/create', verifyToken, createEvent);
+router.get('/get-my-events', verifyToken, getMyEvents);
+router.get('/get-upcoming', getUpcomingEvents);
+router.get('/get-past', getPastEvents);
+router.get(
+  "/get-all-events",
+  (req, res, next) => {
+    // Optional authentication
+    if (req.cookies.token) {
+      verifyToken(req, res, next);
+    } else {
+      next();
     }
-});
+  }, getAllEvents
+);
+
+router.get(
+  "/:eventId",
+  (req, res, next) => {
+    // Optional authentication for private events
+    if (req.cookies.token) {
+      verifyToken(req, res, next);
+    } else {
+      next();
+    }
+  },
+  getEventById
+);
+
+router.put("/update/:eventId", verifyToken, updateEvent);
 
 module.exports = router;

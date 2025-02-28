@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addCsrfToken, fetchCsrfToken, invalidateToken } from '../../../utils/csrf';
-import { useAdminProfile } from '../../../context/AdminProfileContext';
-import { truncateString } from '../../../utils/stringUtils';
+import { addCsrfToken, fetchCsrfToken, invalidateToken } from '../../utils/csrf';
+import { useAdminProfile } from '../../context/AdminProfileContext';
+import { truncateString } from '../../utils/stringUtils';
 import avatar from '/avatar.png';
+import { imageCache } from '../../layout/home/EventCard';
+import { useEvents } from "../../context/EventsContext";
 
 export default function ProfileDropdown() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { adminProfile, clearProfile } = useAdminProfile();
+  const { resetEvents } = useEvents();
 
   const handleLogout = async () => {
     setIsLoading(true);
@@ -24,7 +27,9 @@ export default function ProfileDropdown() {
       if (response.ok) {
         invalidateToken();
         clearProfile();
-        navigate('/signin');
+        imageCache.clear();
+        resetEvents();
+        navigate('/signin', { replace: true }); // Add replace: true
       } else {
         console.error('Logout failed');
       }
@@ -64,7 +69,7 @@ export default function ProfileDropdown() {
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-          <div className="py-1">
+          <div className="pt-1">
             <button
               className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
               onClick={() => navigate('/profile')}
@@ -78,7 +83,7 @@ export default function ProfileDropdown() {
               Invite Admins
             </button>
             <button
-              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100"
+              className="w-full px-4 py-2 text-left text-sm bg-blue-500 text-white hover:bg-blue-400 disabled:opacity-75"
               onClick={handleLogout}
               disabled={isLoading}
             >

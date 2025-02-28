@@ -20,3 +20,15 @@ cd Event_management
 chmod +x start.sh
 ./start.sh
 ```
+
+
+### TODO:
+ ## Admin panel frontend :
+  ~~- Add loading animation in signin, signup, forgot pass pages~~
+  ~~- create invitation of admin or superadmin page~~
+  ~~- create profile page~~
+  - features to edit profile page
+
+ ## Admin panel backend :
+  ~~- route to handle invitation of new admin ~~
+  - route to view and update profile of admins

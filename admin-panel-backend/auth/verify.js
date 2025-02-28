@@ -19,7 +19,8 @@ const verifyToken = async (req, res, next) => {
             email: admin.email,
             profilePic: admin.profilePic,
             name: admin.name,
-            role: admin.role
+            role: admin.role,
+            createdAt: admin.createdAt,
         };
         next();
     } catch (error) {

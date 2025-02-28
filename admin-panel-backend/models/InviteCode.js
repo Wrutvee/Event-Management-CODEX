@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const InviteCodeSchema = new mongoose.Schema(
   {
     code: { type: String, required: true, unique: true },
+    description: { type: String, required: true },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin",

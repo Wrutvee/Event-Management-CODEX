@@ -91,6 +91,26 @@ export default function PasswordReset() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
+      {/* Add back button */}
+      <button
+        onClick={() => navigate("/signin")}
+        className="absolute top-4 left-4 flex items-center text-indigo-600 hover:text-indigo-800"
+      >
+        <svg
+          className="w-5 h-5 mr-1"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+        Back to Sign In
+      </button>
       <div className="w-full max-w-md bg-white p-6 rounded-2xl shadow-lg">
         <div className="flex justify-center">
           <img src={mainLogo} alt="Logo" className="w-20 h-20" />
@@ -127,10 +147,13 @@ export default function PasswordReset() {
               <input
                 type="text"
                 maxLength="6"
+                autoComplete="otp"
                 className="mt-1 flex-1 p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                 placeholder="Enter 6-digit OTP"
                 value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                onChange={(e) =>
+                  setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                }
                 required
                 disabled={!otpSent}
               />
@@ -139,11 +162,13 @@ export default function PasswordReset() {
                 onClick={handleGetOtp}
                 disabled={isLoading || !email || otpSent}
                 className={`mt-1 px-4 py-2 rounded-xl text-white transition
-                  ${isLoading || !email || otpSent 
-                    ? 'bg-gray-400' 
-                    : 'bg-blue-600 hover:bg-blue-700'}`}
+                  ${
+                    isLoading || !email || otpSent
+                      ? "bg-gray-400"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  }`}
               >
-                {isLoading ? <div className="dots-loader" /> : 'Get OTP'}
+                {isLoading ? <div className="dots-loader" /> : "Get OTP"}
               </button>
             </div>
           </div>
@@ -177,11 +202,13 @@ export default function PasswordReset() {
             type="submit"
             disabled={isLoading || !otpSent}
             className={`w-full mt-6 py-3 rounded-xl text-white transition
-              ${isLoading || !otpSent 
-                ? 'bg-gray-400' 
-                : 'bg-blue-600 hover:bg-blue-700'}`}
+              ${
+                isLoading || !otpSent
+                  ? "bg-gray-400"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
           >
-            {isLoading ? <div className="dots-loader" /> : 'Reset Password'}
+            {isLoading ? <div className="dots-loader" /> : "Reset Password"}
           </button>
         </form>
       </div>
