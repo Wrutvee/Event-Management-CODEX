@@ -113,23 +113,24 @@ function Home() {
             </div>
 
             {/* Tabs Navigation */}
-            <div className="mb-6 sm:mb-8 overflow-x-auto">
-              <nav className="flex space-x-4 sm:space-x-8 min-w-max">
+            <div className="mb-6 sm:mb-8">
+              <nav className="flex space-x-4 sm:space-x-8">
                 {['my', 'upcoming', 'past'].map((tab, index) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     className={`
-                      whitespace-nowrap py-2 sm:py-3 px-4 sm:px-6 text-sm sm:text-base font-semibold rounded-md
+                      whitespace-nowrap py-2 sm:py-3 px-4 sm:px-6 text-sm sm:text-base font-semibold rounde  d-md
                       transition-all duration-300 transform hover:scale-105
                       ${activeTab === tab 
                         ? 'bg-indigo-600 text-white shadow-lg hover:bg-indigo-700'
                         : 'bg-gray-900 text-white hover:bg-gray-800'
                       }
-                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                      focus:outline-none active:outline-none
                     `}
                     style={{
-                      animationDelay: `${index * 150}ms`
+                      animationDelay: `${index * 150}ms`,
+                      WebkitTapHighlightColor: 'transparent'
                     }}
                   >
                     {tab.charAt(0).toUpperCase() + tab.slice(1)} Events
@@ -157,12 +158,15 @@ function Home() {
       </div>
 
       {/* Floating Action Button */}
-      <div className="fixed bottom-6 right-6 z-50" ref={plusButtonRef}>
+      <div 
+        className="fixed bottom-6 right-6 z-50 animate-float" 
+        ref={plusButtonRef}
+      >
         <button
           onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
-          className="w-14 h-14 sm:w-16 sm:h-16 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-lg 
-            hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 
-            transition-all duration-300 transform hover:scale-110"
+          className="w-14 h-14 sm:w-16 sm:h-16 bg-indigo-600 rounded-full flex items-center justify-center 
+          text-white shadow-xl hover:bg-indigo-700 focus:outline-none transition-all duration-300 
+          transform hover:scale-110"
         >
           <svg
             className={`h-8 w-8 sm:h-10 sm:w-10 transition-transform duration-300 ${
