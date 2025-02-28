@@ -74,12 +74,17 @@ function Header() {
       <header className="bg-white shadow-lg relative z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            {/* EventHub Company Logo Text */}
+            {/* EventHub Company Logo Text with Adjusted Spacing */}
             <div className="flex-shrink-0 flex items-center">
-              <span className="text-2xl font-extrabold text-gray-900 tracking-tight">
-                <span className="text-indigo-600">Event</span>
-                <span className="text-gray-900">Hub</span>
-              </span>
+              <Link 
+                to="/" 
+                className="focus:outline-none group"
+              >
+                <span className="text-4xl font-black tracking-tight flex items-center transform transition-all duration-200 active:scale-95">
+                  <span className="text-indigo-600 group-hover:text-indigo-700 transition-colors">Event</span>
+                  <span className="text-gray-800 group-hover:text-gray-900 transition-colors ml-1">Hub</span>
+                </span>
+              </Link>
             </div>
 
             {/* Right section */}
