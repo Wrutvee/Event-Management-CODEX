@@ -91,7 +91,7 @@ export default function EventCard({ event }) {
       {/* Upper section - smaller height */}
       <div className="w-full flex justify-center rounded-[1.25rem] relative h-24">
         {/* Image container - positioned to overlap */}
-        <div className="absolute z-10 top-8 w-[170px] aspect-square">
+        <div className="absolute z-10 top-8 w-[170px] h-[170px] aspect-square">
           <div className="relative">
             {!imageLoaded && (
               <div className="absolute inset-0 overflow-hidden rounded-lg">
@@ -102,7 +102,7 @@ export default function EventCard({ event }) {
               src={fallbackImage ? placeholder : imageUrl}
               alt={event.title}
               loading='lazy'
-              className={`object-cover w-full h-full rounded-lg transition-opacity duration-300 ${
+              className={`object-cover w-[170px] h-[170px] rounded-lg transition-opacity duration-300 ${
                 imageLoaded ? "opacity-100" : "opacity-0"
               }`}
               // Remove onLoad and onError handlers as we're handling this in useEffect
