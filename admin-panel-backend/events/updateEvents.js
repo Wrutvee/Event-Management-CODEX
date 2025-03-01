@@ -38,7 +38,7 @@ const updateEvent = async (req, res) => {
         // Check if user has permission to edit
         const canEdit = 
             req.user.role === 'superadmin' || 
-            event.organizer.createdBy.toString() === req.user.id ||
+            event.organizer.createdBy.toString() === req.user.id.toString() ||
             event.organizer.managedBy.includes(req.user.id);
 
         if (!canEdit) {

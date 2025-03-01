@@ -15,6 +15,14 @@ const createEvent = async (req, res) => {
             });
         }
 
+        // Ensure mediaLinks is an array of objects with url and type
+        if (eventData.mediaLinks) {
+            eventData.mediaLinks = eventData.mediaLinks.map(media => ({
+                url: media.url,
+                type: media.type
+            }));
+        }
+
         // Add creator to organizer
         eventData.organizer.createdBy = req.user.id;
 
@@ -38,7 +46,7 @@ const createEvent = async (req, res) => {
         console.error("Event creation error:", error);
         res.status(500).json({
             success: false,
-            message: "Error creating event"
+            message: error.message || "Error creating event"
         });
     }
 };
