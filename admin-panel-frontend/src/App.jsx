@@ -5,6 +5,7 @@ import { AdminProfileProvider } from './context/AdminProfileContext';
 import { EventsProvider } from './context/EventsContext';
 import { Suspense, lazy } from 'react';
 import PageLoader from "./components/common/PageLoader";
+import EventPage from "./pages/events/EventPage";
 
 const SignInComponent = lazy(() => import("./pages/auth/SignIn"));
 const SignUpComponent = lazy(() => import("./pages/auth/SignUp"));
@@ -111,6 +112,15 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path='/events/:eventId'
+                  element={
+                    <ProtectedRoute>
+                      <Suspense fallback={<PageLoader />}>
+                        <EventPage />
+                      </Suspense>
+                    </ProtectedRoute>
+                  } />
               </Routes>
             </Suspense>
           </BrowserRouter>

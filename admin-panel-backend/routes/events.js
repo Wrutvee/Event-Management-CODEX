@@ -8,6 +8,7 @@ const { getAllEvents } = require('../events/getAllEvents');
 const { getEventById } = require("../events/getEventById");
 const { updateEvent } = require("../events/updateEvents");
 const { verifyToken } = require('../auth/verify');
+const { createFeedback } = require('../events/createFeedback');
 
 router.post('/create', verifyToken, createEvent);
 router.get('/get-my-events', verifyToken, getMyEvents);
@@ -37,6 +38,8 @@ router.get(
   },
   getEventById
 );
+
+router.put('/:eventId/feedback', verifyToken, createFeedback);
 
 router.put("/update/:eventId", verifyToken, updateEvent);
 

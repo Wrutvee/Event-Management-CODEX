@@ -56,6 +56,15 @@ const updateEvent = async (req, res) => {
             updateData.organizer.managedBy = admins.map(admin => admin._id);
         }
 
+        // Format resources data
+        if (updateData.resources) {
+            updateData.resources = updateData.resources.map(resource => ({
+                name: resource.name,
+                url: resource.url,
+                type: resource.type
+            }));
+        }
+
         // Update the event
         const updatedEvent = await Event.findByIdAndUpdate(
             eventId,
@@ -74,7 +83,7 @@ const updateEvent = async (req, res) => {
         console.error('Event update error:', error);
         res.status(500).json({
             success: false,
-            message: 'Error updating event'
+            message: error.message || 'Error updating event'
         });
     }
 };

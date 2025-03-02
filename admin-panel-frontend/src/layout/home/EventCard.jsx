@@ -77,12 +77,11 @@ export default function EventCard({ event }) {
     if (eventStartDate <= now) {
       return false;
     }
-
     // Check admin permissions
     if (adminProfile.role === "superadmin") return true;
     return (
       event.organizer.createdBy._id === adminProfile.id ||
-      event.organizer.managedBy.includes(adminProfile.id)
+      event.organizer.managedBy.some(manager => manager._id === adminProfile.id)
     );
   };
 
@@ -176,7 +175,9 @@ export default function EventCard({ event }) {
                 Event Started
               </button>
             ) : null}
-            <button className="w-full px-4 py-2.5 text-[0.75rem] font-bold text-white bg-indigo-600 border border-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-[0_2px_24px_0_rgba(0,0,0,0.06)] flex items-center justify-center gap-1">
+            <button
+             onClick={() => navigate(`/events/${event._id}`)} 
+             className="w-full px-4 py-2.5 text-[0.75rem] font-bold text-white bg-indigo-600 border border-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-[0_2px_24px_0_rgba(0,0,0,0.06)] flex items-center justify-center gap-1">
               <Eye className="w-3 h-3" />
               View Details
             </button>

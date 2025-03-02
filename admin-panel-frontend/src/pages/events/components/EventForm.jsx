@@ -100,6 +100,13 @@ export default function EventForm({
             ? formatDateForInput(initialData.registration.deadline)
             : "",
         },
+        // Transform managedBy array to only contain emails
+        organizer: {
+          ...initialData.organizer,
+          managedBy: initialData.organizer.managedBy.map(manager => 
+            typeof manager === 'object' ? manager.email : manager
+          ),
+        }
       };
     });
   
@@ -202,7 +209,14 @@ export default function EventForm({
       registration: {
         ...formData.registration,
         formFields: formData.registration.formFields.map((fieldId) => {
-          const fieldConfig = defaultFormFields.find((f) => f.id === fieldId);
+          // Add null check and default value
+          const fieldConfig = defaultFormFields.find(
+            (f) => f.id === fieldId
+          ) || {
+            id: fieldId,
+            label: fieldId,
+            required: false,
+          };
           return {
             id: fieldConfig.id,
             label: fieldConfig.label,
@@ -281,9 +295,6 @@ export default function EventForm({
       autoProceed: false
     });
 
-    uppy.use(FileInput);
-    uppy.use(DragDrop);
-
     uppy.on("file-added", async (file) => {
       try {
         // For cover photo, remove any existing files first
@@ -299,16 +310,26 @@ export default function EventForm({
         const uploadedUrl = await uploadToGCS(file);
         
         if (fileType === "cover") {
-          setFormData(prev => ({ ...prev, coverPhoto: uploadedUrl }));
+          setFormData((prev) => ({ ...prev, coverPhoto: uploadedUrl }));
         } else if (fileType === "media") {
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
-            mediaLinks: [...prev.mediaLinks, { url: uploadedUrl, type: file.type }],
+            mediaLinks: [
+              ...prev.mediaLinks,
+              { url: uploadedUrl, type: file.type },
+            ],
           }));
         } else if (fileType === "resource") {
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
-            resources: [...prev.resources, { name: file.name, url: uploadedUrl }],
+            resources: [
+              ...prev.resources,
+              {
+                name: file.name,
+                url: uploadedUrl,
+                type: file.type,
+              },
+            ],
           }));
         }
       } catch (error) {
@@ -703,9 +724,14 @@ export default function EventForm({
                     key={index}
                     className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
                   >
-                    <span className="text-sm text-gray-700">
-                      {resource.name}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-700">
+                        {resource.name}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        ({resource.url ? "Uploaded" : "Pending"})
+                      </span>
+                    </div>
                     <button
                       type="button"
                       onClick={() => {
@@ -827,12 +853,14 @@ export default function EventForm({
 
             {formData.organizer.managedBy.length > 0 && (
               <div className="space-y-2">
-                {formData.organizer.managedBy.map((email, index) => (
+                {formData.organizer.managedBy.map((managerEmail, index) => (
                   <div
                     key={index}
                     className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
                   >
-                    <span className="text-sm text-gray-700">{email}</span>
+                    <span className="text-sm text-gray-700">
+                      {typeof managerEmail === 'object' ? managerEmail.email : managerEmail}
+                    </span>
                     <button
                       type="button"
                       onClick={() =>

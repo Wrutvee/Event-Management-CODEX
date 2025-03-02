@@ -23,6 +23,15 @@ const createEvent = async (req, res) => {
             }));
         }
 
+        // Ensure resources is an array of objects with name, url and type
+        if (eventData.resources) {
+            eventData.resources = eventData.resources.map(resource => ({
+                name: resource.name,
+                url: resource.url,
+                type: resource.type
+            }));
+        }
+
         // Add creator to organizer
         eventData.organizer.createdBy = req.user.id;
 

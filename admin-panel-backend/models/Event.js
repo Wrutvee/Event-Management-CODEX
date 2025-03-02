@@ -12,20 +12,30 @@ const EventSchema = new mongoose.Schema(
       {
         url: {
           type: String,
-          required: true
+          required: true,
         },
         type: {
           type: String,
-          required: true
+          required: true,
         },
-        _id: false // Prevent Mongoose from creating _id for subdocuments
+        _id: false, // Prevent Mongoose from creating _id for subdocuments
       },
     ],
     resources: [
       {
-        name: String,
-        link: String,
-        _id: false,
+        name: {
+          type: String,
+          required: true,
+        },
+        url: {
+          type: String,
+          required: true,
+        },
+        type: {
+          type: String,
+          required: true,
+        },
+        _id: false, // Prevent Mongoose from creating _id for subdocuments
       },
     ],
     category: { type: String, required: true },
@@ -96,7 +106,21 @@ const EventSchema = new mongoose.Schema(
       enum: ["cancelled", "running"],
       default: "running",
     },
-    isFeedbackEnabled: { type: Boolean, default: false },
+    feedback: {
+      isEnabled: { type: Boolean, default: false },
+      questions: [
+        {
+          text: { type: String },
+          type: {
+            type: String,
+            enum: ["star", "text", "slider", "choice"],
+          },
+          options: [String], // For multiple choice questions
+          required: { type: Boolean, default: true },
+          order: { type: Number },
+        },
+      ],
+    },
   },
   { timestamps: true }
 );

@@ -24,3 +24,21 @@
     background-position: 100% 50%,0 calc(50% - 2.4px),0 calc(50% + 2.4px),50% calc(50% - 2.4px),50% calc(50% + 2.4px);
   }
 }
+
+/* Custom scrollbar for tabs */
+.tab-scroll::-webkit-scrollbar {
+  height: 1px;
+}
+
+.tab-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.tab-scroll::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 2px;
+}
+
+.tab-scroll::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
