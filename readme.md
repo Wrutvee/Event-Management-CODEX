@@ -28,7 +28,9 @@ chmod +x start.sh
   ~~- create invitation of admin or superadmin page~~
   ~~- create profile page~~
   ~~- features to edit profile page~~
+  - Fully build the event page
 
  ## Admin panel backend :
   ~~- route to handle invitation of new admin ~~
   ~~- route to view and update profile of admins~~
+  - Add all the necessary backend logic to handle the event page
