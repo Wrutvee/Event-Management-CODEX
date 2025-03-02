@@ -1,28 +1,51 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
-import SignUp from './pages/Signup';
+import SignUp from './pages/SignUp';
 import Home from './pages/Home';
 import Notifications from './pages/Notification';
-
-import 'react-toastify/dist/ReactToastify.css';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
-    <AuthProvider>
-      <div className="min-h-screen bg-gray-50">
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/" element={<Navigate to="/home" replace />} />
-        </Routes>
-        <ToastContainer position="top-right" autoClose={3000} />
-      </div>
-    </AuthProvider>
+    <>
+      <Toaster position="top-right" toastOptions={{
+        duration: 3000,
+        style: {
+          background: '#363636',
+          color: '#fff',
+        },
+        success: {
+          style: {
+            background: '#22c55e',
+          },
+        },
+        error: {
+          style: {
+            background: '#ef4444',
+          },
+        },
+      }} />
+      
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/" element={<Navigate to="/home" replace />} />
+        
+        <Route path="/home" element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/notifications" element={
+          <ProtectedRoute>
+            <Notifications />
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </>
   );
 }
 

@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
 import SocialLogin from '../components/SocialLogin';
-import authService from '../services/authService';
+import { useAuth } from '../context/AuthContext';
 import AnimatedCheckbox from '../components/AnimatedCheckbox';
+import { rateLimiter } from '../utils/security';
 
 function Login() {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [rememberMe, setRememberMe] = useState(false);
@@ -28,31 +28,28 @@ function Login() {
 
   const onSubmit = async (data) => {
     try {
-      if (loginAttempts >= 5) {
+      // Use the rateLimiter from security.js
+      const ipKey = 'login-' + data.email;
+      if (!rateLimiter.checkLimit(ipKey)) {
         toast.error('Too many login attempts. Please try again later.');
         return;
       }
 
       setIsLoading(true);
-      await authService.login({ ...data, remember: rememberMe });
+      await login(data.email, data.password, rememberMe);
       
-      // Clear any existing errors
-      toast.success('Welcome back!');
-      
-      const redirect = location.state?.from || '/home';
-      navigate(redirect, { replace: true });
+      // Reset rate limiter on successful login
+      rateLimiter.reset(ipKey);
       
     } catch (error) {
       setLoginAttempts(prev => prev + 1);
       
-      if (error.message.includes('credentials')) {
+      if (error.response?.data?.message?.includes('credentials')) {
         setError('email', { message: 'Invalid email or password' });
         setError('password', { message: 'Invalid email or password' });
       } else {
-        toast.error(error.message || 'Login failed');
+        // Error toast is handled in the AuthContext
       }
-      
-      console.error('Login error:', error); // Debug log
     } finally {
       setIsLoading(false);
     }
@@ -121,10 +118,13 @@ function Login() {
             />
 
             <div className="flex items-center justify-between">
-              <AnimatedCheckbox
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
+              <div className="flex items-center">
+                <AnimatedCheckbox
+                  checked={rememberMe}
+                  onChange={() => setRememberMe(!rememberMe)}
+                  label="Remember me"
+                />
+              </div>
               
               <Link 
                 to="/forgot-password"

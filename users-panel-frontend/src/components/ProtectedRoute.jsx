@@ -1,21 +1,29 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { rateLimiter } from '../utils/security';
 
-function ProtectedRoute({ children }) {
-  const { user } = useAuth();
+const ProtectedRoute = ({ children }) => {
+  const { user, isLoading } = useAuth();
   const location = useLocation();
 
-  console.log('ProtectedRoute - Current user:', user);
-  console.log('ProtectedRoute - Current location:', location);
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+      </div>
+    );
+  }
 
   if (!user) {
-    console.log('No user found, redirecting to login');
+    // Track failed access attempts
+    const ipKey = 'user-ip'; // In a real app, use actual IP or session ID
+    rateLimiter.checkLimit(ipKey);
+    
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  console.log('User authenticated, rendering protected content');
   return children;
-}
+};
 
 export default ProtectedRoute;
