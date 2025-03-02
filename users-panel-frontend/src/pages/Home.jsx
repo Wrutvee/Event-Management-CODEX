@@ -2,72 +2,75 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import EventCard from '../components/EventCard';
+import { fetchPublicEvents, fetchUpcomingEvents, fetchPastEvents, fetchMyEvents } from '../services/eventService';
+import { toast } from 'react-hot-toast';
 
 function Home() {
   const [activeTab, setActiveTab] = useState('upcoming');
   const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
   const plusButtonRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [eventsByType, setEventsByType] = useState({
+    my: [],
+    upcoming: [],
+    past: []
+  });
   
-  // Sample event data categorized by type
-  const eventsByType = {
-    my: [
-      {
-        id: 1,
-        title: 'My Tech Workshop',
-        description: 'Workshop on React Development',
-        date: '2024-03-10',
-        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87',
-        isRegistered: true
-      },
-      {
-        id: 2,
-        title: 'Local Meetup',
-        description: 'Monthly Developer Meetup',
-        date: '2024-03-20',
-        image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea',
-        isRegistered: true
-      }
-    ],
-    upcoming: [
-      {
-        id: 3,
-        title: 'Tech Conference 2024',
-        description: 'Join us for the biggest tech conference',
-        date: '2024-04-15',
-        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87',
-        isRegistered: false
-      },
-      {
-        id: 4,
-        title: 'Music Festival',
-        description: 'Experience amazing live performances',
-        date: '2024-04-01',
-        image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea',
-        isRegistered: false
-      }
-    ],
-    past: [
-      {
-        id: 5,
-        title: 'Code Summit 2023',
-        description: 'Past coding conference',
-        date: '2023-12-15',
-        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87',
-        isRegistered: true
-      },
-      {
-        id: 6,
-        title: 'Winter Hackathon',
-        description: 'Previous hackathon event',
-        date: '2023-11-30',
-        image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea',
-        isRegistered: true
-      }
-    ]
-  };
-
   // Get events based on active tab
   const currentEvents = eventsByType[activeTab] || [];
+
+  // Fetch events from backend
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch events based on active tab
+        if (activeTab === 'upcoming') {
+          const events = await fetchUpcomingEvents();
+          setEventsByType(prev => ({ ...prev, upcoming: events }));
+        } else if (activeTab === 'past') {
+          const events = await fetchPastEvents();
+          setEventsByType(prev => ({ ...prev, past: events }));
+        } else if (activeTab === 'my') {
+          const events = await fetchMyEvents();
+          setEventsByType(prev => ({ ...prev, my: events }));
+        }
+      } catch (error) {
+        console.error(`Error fetching ${activeTab} events:`, error);
+        toast.error(`Failed to load ${activeTab} events`);
+        
+        // Try to fetch all events as fallback
+        try {
+          const allEvents = await fetchPublicEvents();
+          const now = new Date();
+          
+          // Sort events into categories
+          const upcoming = allEvents.filter(event => {
+            const eventDate = new Date(event.dateTime?.start || event.date);
+            return eventDate > now;
+          });
+          
+          const past = allEvents.filter(event => {
+            const eventDate = new Date(event.dateTime?.start || event.date);
+            return eventDate <= now;
+          });
+          
+          // Update the relevant category
+          if (activeTab === 'upcoming') {
+            setEventsByType(prev => ({ ...prev, upcoming }));
+          } else if (activeTab === 'past') {
+            setEventsByType(prev => ({ ...prev, past }));
+          }
+        } catch (fallbackError) {
+          console.error('Fallback error:', fallbackError);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchEvents();
+  }, [activeTab]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -120,7 +123,7 @@ function Home() {
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     className={`
-                      whitespace-nowrap py-2 sm:py-3 px-4 sm:px-6 text-sm sm:text-base font-semibold rounde  d-md
+                      whitespace-nowrap py-2 sm:py-3 px-4 sm:px-6 text-sm sm:text-base font-semibold rounded-md
                       transition-all duration-300 transform hover:scale-105
                       ${activeTab === tab 
                         ? 'bg-indigo-600 text-white shadow-lg hover:bg-indigo-700'
@@ -141,17 +144,45 @@ function Home() {
 
             {/* Events Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {currentEvents.map((event, index) => (
-                <div 
-                  key={event.id}
-                  className="animate-fadeIn transform transition-all duration-300 hover:scale-[1.02]"
-                  style={{
-                    animationDelay: `${index * 100}ms`
-                  }}
-                >
-                  <EventCard event={event} />
+              {isLoading ? (
+                // Loading skeleton
+                [...Array(3)].map((_, i) => (
+                  <div key={i} className="animate-pulse bg-white rounded-lg shadow-md p-4 h-80">
+                    <div className="bg-gray-200 h-40 rounded-md mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
+                    <div className="h-3 bg-gray-200 rounded w-5/6 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-4/6"></div>
+                    <div className="mt-4 flex justify-between items-center">
+                      <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                      <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+                    </div>
+                  </div>
+                ))
+              ) : currentEvents.length > 0 ? (
+                currentEvents.map((event, index) => (
+                  <div 
+                    key={event._id || event.id}
+                    className="animate-fadeIn transform transition-all duration-300 hover:scale-[1.02]"
+                    style={{
+                      animationDelay: `${index * 100}ms`
+                    }}
+                  >
+                    <EventCard event={event} />
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full flex flex-col items-center justify-center py-12">
+                  <div className="text-gray-400 text-xl mb-4">No events found</div>
+                  <p className="text-gray-500">
+                    {activeTab === 'my' 
+                      ? "You haven't registered for any events yet." 
+                      : activeTab === 'upcoming' 
+                      ? "There are no upcoming events at the moment." 
+                      : "There are no past events to display."}
+                  </p>
                 </div>
-              ))}
+              )}
             </div>
           </main>
         </div>
@@ -175,7 +206,7 @@ function Home() {
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
-            strokeWidth={2.5} // Made the stroke thicker
+            strokeWidth={2.5}
           >
             <path
               strokeLinecap="round"
@@ -185,17 +216,36 @@ function Home() {
           </svg>
         </button>
 
-        {/* Floating Menu */}
+        {/* Floating Menu - Improved Styling */}
         {isPlusMenuOpen && (
-          <div className="absolute bottom-full right-0 mb-4 w-48 bg-white rounded-lg shadow-xl py-2 border border-gray-100">
-            {['certificates', 'help'].map((item) => (
+          <div className="absolute bottom-full right-0 mb-4 w-56 bg-white rounded-lg shadow-2xl py-2 border border-gray-100 overflow-hidden">
+            <div className="px-4 py-2 border-b border-gray-100 mb-1">
+              <h3 className="text-sm font-medium text-gray-700">Quick Actions</h3>
+            </div>
+            {['certificates', 'help'].map((item, index) => (
               <Link
                 key={item}
                 to={`/${item}`}
-                className="block px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 
-                  transition-all duration-150 capitalize transform hover:translate-x-2"
+                className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 
+                  transition-all duration-200 group"
               >
-                {item}
+                <span className="w-8 h-8 mr-3 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-600 group-hover:bg-indigo-200 transition-colors">
+                  {item === 'certificates' ? (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  )}
+                </span>
+                <div>
+                  <span className="block font-medium capitalize">{item}</span>
+                  <span className="block text-xs text-gray-500 mt-0.5">
+                    {item === 'certificates' ? 'View your certificates' : 'Get support'}
+                  </span>
+                </div>
               </Link>
             ))}
           </div>
