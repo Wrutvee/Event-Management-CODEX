@@ -100,7 +100,85 @@ const validateEventInput = (eventData, mode = 'create') => {
         }
     }
 
+    // Validate resources
+    if (eventData.resources) {
+        if (!Array.isArray(eventData.resources)) {
+            errors.push("Resources must be an array");
+        } else {
+            eventData.resources.forEach((resource, index) => {
+                if (!resource.name) {
+                    errors.push(`Resource ${index + 1} must have a name`);
+                }
+                if (!resource.url) {
+                    errors.push(`Resource ${index + 1} must have a URL`);
+                }
+                if (!resource.type) {
+                    errors.push(`Resource ${index + 1} must have a type`);
+                }
+                if (resource.type && !resource.type.includes('pdf')) {
+                    errors.push(`Resource ${index + 1} must be a PDF file`);
+                }
+            });
+        }
+    }
+
     return errors;
 };
 
-module.exports = { validateEventInput };
+const validateFeedback = (feedbackData) => {
+  const errors = [];
+
+  if (!feedbackData) {
+    errors.push("Feedback data is required");
+    return errors;
+  }
+
+  if (typeof feedbackData.isEnabled !== 'boolean') {
+    errors.push("Feedback enabled status must be specified");
+  }
+
+  if (feedbackData.isEnabled) {
+    if (!Array.isArray(feedbackData.questions)) {
+      errors.push("Questions must be an array");
+      return errors;
+    }
+
+    feedbackData.questions.forEach((question, index) => {
+      if (!question.text?.trim()) {
+        errors.push(`Question ${index + 1} text is required`);
+      }
+
+      if (!question.type) {
+        errors.push(`Question ${index + 1} type is required`);
+      }
+
+      if (!['star', 'text', 'slider', 'choice'].includes(question.type)) {
+        errors.push(`Question ${index + 1} has invalid type`);
+      }
+
+      if (question.type === 'choice') {
+        if (!Array.isArray(question.options) || question.options.length < 2) {
+          errors.push(`Question ${index + 1} must have at least 2 options`);
+        }
+
+        question.options.forEach((option, optionIndex) => {
+          if (!option.trim()) {
+            errors.push(`Option ${optionIndex + 1} for question ${index + 1} cannot be empty`);
+          }
+        });
+      }
+
+      if (typeof question.required !== 'boolean') {
+        errors.push(`Question ${index + 1} must specify if it's required`);
+      }
+
+      if (typeof question.order !== 'number') {
+        errors.push(`Question ${index + 1} must have an order value`);
+      }
+    });
+  }
+
+  return errors;
+};
+
+module.exports = { validateEventInput, validateFeedback };

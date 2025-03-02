@@ -38,7 +38,7 @@ const updateEvent = async (req, res) => {
         // Check if user has permission to edit
         const canEdit = 
             req.user.role === 'superadmin' || 
-            event.organizer.createdBy.toString() === req.user.id ||
+            event.organizer.createdBy.toString() === req.user.id.toString() ||
             event.organizer.managedBy.includes(req.user.id);
 
         if (!canEdit) {
@@ -54,6 +54,15 @@ const updateEvent = async (req, res) => {
             const adminEmails = updateData.organizer.managedBy;
             const admins = await Admin.find({ email: { $in: adminEmails } });
             updateData.organizer.managedBy = admins.map(admin => admin._id);
+        }
+
+        // Format resources data
+        if (updateData.resources) {
+            updateData.resources = updateData.resources.map(resource => ({
+                name: resource.name,
+                url: resource.url,
+                type: resource.type
+            }));
         }
 
         // Update the event
@@ -74,7 +83,7 @@ const updateEvent = async (req, res) => {
         console.error('Event update error:', error);
         res.status(500).json({
             success: false,
-            message: 'Error updating event'
+            message: error.message || 'Error updating event'
         });
     }
 };

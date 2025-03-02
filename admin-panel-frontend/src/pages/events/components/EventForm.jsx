@@ -1,8 +1,10 @@
-import { useAdminProfile } from "../../../context/AdminProfileContext";
 import { useState, useEffect } from "react";
 import { Dashboard } from "@uppy/react";
 import Uppy from "@uppy/core";
+import FileInput from '@uppy/file-input';
+import DragDrop from '@uppy/drag-drop';
 import { validateEventForm } from "./InputValidation";
+import { addCsrfToken, fetchCsrfToken } from "../../../utils/csrf";
 
 // Import Uppy CSS
 import "@uppy/core/dist/style.css";
@@ -98,6 +100,13 @@ export default function EventForm({
             ? formatDateForInput(initialData.registration.deadline)
             : "",
         },
+        // Transform managedBy array to only contain emails
+        organizer: {
+          ...initialData.organizer,
+          managedBy: initialData.organizer.managedBy.map(manager => 
+            typeof manager === 'object' ? manager.email : manager
+          ),
+        }
       };
     });
   
@@ -200,7 +209,14 @@ export default function EventForm({
       registration: {
         ...formData.registration,
         formFields: formData.registration.formFields.map((fieldId) => {
-          const fieldConfig = defaultFormFields.find((f) => f.id === fieldId);
+          // Add null check and default value
+          const fieldConfig = defaultFormFields.find(
+            (f) => f.id === fieldId
+          ) || {
+            id: fieldId,
+            label: fieldId,
+            required: false,
+          };
           return {
             id: fieldConfig.id,
             label: fieldConfig.label,
@@ -221,40 +237,122 @@ export default function EventForm({
     }
   };
 
-  // Add allowed plugins for media and resources
-  const mediaUppy = new Uppy({
-    id: "mediaUppy",
-    restrictions: {
-      maxFileSize: 20 * 1024 * 1024,
-      maxNumberOfFiles: 10,
-      allowedFileTypes: ["image/*", "video/*"],
-    },
-  });
-  const resourcesUppy = new Uppy({
-    id: "resourcesUppy",
-    restrictions: {
-      allowedFileTypes: [".pdf"],
-    },
-    autoProceed: false,
-    allowMultipleUploadBatches: true,
-  })
-    .on("file-added", (file) => {
-      file.meta = { ...file.meta, type: "resource" };
-    })
-    .on("upload", (data) => {
-      // Prevent default upload behavior
-      data.preventDefault();
+
+  const uploadToGCS = async (file) => {
+    try {
+      // Get signed URL for upload
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_API_URL}/uploads/generate-upload-url`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...addCsrfToken(),
+          },
+          body: JSON.stringify({
+            fileName: file.name,
+            fileType: file.type,
+          }),
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to get upload URL');
+      }
+
+      const { uploadUrl, fileName } = await response.json();
+
+      // Upload to GCS
+      const uploadResponse = await fetch(uploadUrl, {
+        method: "PUT",
+        body: file.data,
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload file');
+      }
+
+      // Return the public URL in the correct format
+      return `https://storage.googleapis.com/${import.meta.env.VITE_GCS_BUCKET_NAME}/${encodeURIComponent(fileName)}`;
+    } catch (error) {
+      console.error("Upload failed:", error); 
+      throw new Error('File upload failed. Please try again.');
+    }
+  };
+
+  const configureUppy = (fileType) => {
+    const uppy = new Uppy({
+      restrictions: {
+        maxFileSize: fileType === 'media' ? 20 * 1024 * 1024 : 5 * 1024 * 1024,
+        allowedFileTypes: fileType === 'resource' ? ['.pdf'] : ['image/*', 'video/*'],
+        // Add maxNumberOfFiles restriction for cover photo
+        maxNumberOfFiles: fileType === 'cover' ? 1 : null
+      },
+      autoProceed: false
     });
 
-  // Add new Uppy instance for cover photo
-  const coverPhotoUppy = new Uppy({
-    id: "coverPhotoUppy",
-    restrictions: {
-      maxFileSize: 5 * 1024 * 1024,
-      maxNumberOfFiles: 1,
-      allowedFileTypes: ["image/*"],
-    },
-  });
+    uppy.on("file-added", async (file) => {
+      try {
+        // For cover photo, remove any existing files first
+        if (fileType === "cover") {
+          const existingFiles = uppy.getFiles();
+          existingFiles.forEach(existingFile => {
+            if (existingFile.id !== file.id) {
+              uppy.removeFile(existingFile.id);
+            }
+          });
+        }
+
+        const uploadedUrl = await uploadToGCS(file);
+        
+        if (fileType === "cover") {
+          setFormData((prev) => ({ ...prev, coverPhoto: uploadedUrl }));
+        } else if (fileType === "media") {
+          setFormData((prev) => ({
+            ...prev,
+            mediaLinks: [
+              ...prev.mediaLinks,
+              { url: uploadedUrl, type: file.type },
+            ],
+          }));
+        } else if (fileType === "resource") {
+          setFormData((prev) => ({
+            ...prev,
+            resources: [
+              ...prev.resources,
+              {
+                name: file.name,
+                url: uploadedUrl,
+                type: file.type,
+              },
+            ],
+          }));
+        }
+      } catch (error) {
+        uppy.removeFile(file.id);
+        setError(error.message);
+      }
+    });
+
+    return uppy;
+  };
+
+  const [coverPhotoUppy] = useState(() => configureUppy("cover"));
+  const [mediaUppy] = useState(() => configureUppy("media")); 
+  const [resourcesUppy] = useState(() => configureUppy("resource"));
+
+  // Clean up Uppy instances on unmount
+  // useEffect(() => {
+  //   return () => {
+  //     coverPhotoUppy.close();
+  //     mediaUppy.close();
+  //     resourcesUppy.close();
+  //   };
+  // }, [coverPhotoUppy, mediaUppy, resourcesUppy]);
 
   const categories = [
     "Hackathon",
@@ -282,11 +380,11 @@ export default function EventForm({
               >
                 <div>
                   <h3 className="font-medium">
-                    {(draft?.data?.title) || "Untitled Event"}
+                    {draft?.data?.title || "Untitled Event"}
                   </h3>
                   <p className="text-sm text-gray-500">
                     Last modified:{" "}
-                    {draft?.lastModified 
+                    {draft?.lastModified
                       ? new Date(draft.lastModified).toLocaleDateString()
                       : "Unknown date"}
                   </p>
@@ -504,7 +602,7 @@ export default function EventForm({
             <p className="text-sm text-gray-500">
               Upload a cover photo for your event. Maximum size: 5MB
             </p>
-            
+
             <Dashboard
               uppy={coverPhotoUppy}
               plugins={["FileInput", "DragDrop"]}
@@ -514,14 +612,16 @@ export default function EventForm({
               proudlyDisplayPoweredByUppy={false}
               className="z-50!"
             />
-            
+
             {formData.coverPhoto && (
               <div className="mt-4 relative group w-full max-w-md">
-                <img
-                  src={formData.coverPhoto}
-                  alt="Cover"
-                  className="w-full h-48 object-cover rounded-lg"
-                />
+                <div className="h-[170px] overflow-hidden rounded-lg">
+                  <img
+                    src={formData.coverPhoto}
+                    alt="Cover"
+                    className="w-full h-[170px] object-cover"
+                  />
+                </div>
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, coverPhoto: "" })}
@@ -624,9 +724,14 @@ export default function EventForm({
                     key={index}
                     className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
                   >
-                    <span className="text-sm text-gray-700">
-                      {resource.name}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-700">
+                        {resource.name}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        ({resource.url ? "Uploaded" : "Pending"})
+                      </span>
+                    </div>
                     <button
                       type="button"
                       onClick={() => {
@@ -748,12 +853,14 @@ export default function EventForm({
 
             {formData.organizer.managedBy.length > 0 && (
               <div className="space-y-2">
-                {formData.organizer.managedBy.map((email, index) => (
+                {formData.organizer.managedBy.map((managerEmail, index) => (
                   <div
                     key={index}
                     className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
                   >
-                    <span className="text-sm text-gray-700">{email}</span>
+                    <span className="text-sm text-gray-700">
+                      {typeof managerEmail === 'object' ? managerEmail.email : managerEmail}
+                    </span>
                     <button
                       type="button"
                       onClick={() =>

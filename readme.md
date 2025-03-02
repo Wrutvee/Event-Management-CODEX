@@ -27,8 +27,17 @@ chmod +x start.sh
   ~~- Add loading animation in signin, signup, forgot pass pages~~
   ~~- create invitation of admin or superadmin page~~
   ~~- create profile page~~
-  - features to edit profile page
+  ~~- features to edit profile page~~
+  - Fully build the event page
 
  ## Admin panel backend :
   ~~- route to handle invitation of new admin ~~
-  - route to view and update profile of admins
+  ~~- route to view and update profile of admins~~
+  - Add all the necessary backend logic to handle the event page
+  
+  ## Users panel frontend :
+    - Create events page
+    - Fetch event lists from backend instead of mock data
+
+  ## Users panel backend :
+    - Create route to serve event data

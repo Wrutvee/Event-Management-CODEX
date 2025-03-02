@@ -5,6 +5,7 @@ const SocialLogin = () => {
     <div className="mt-4">
       <button
         type="button"
+        disabled
         className="w-full flex items-center justify-center gap-3 px-4 py-2.5 
         bg-gray-100 hover:bg-gray-50 
         text-gray-700 font-medium 
@@ -31,7 +32,7 @@ const SocialLogin = () => {
             fill="#EA4335"
           />
         </svg>
-        Continue with Google
+        Continue with Google (coming soon...)
       </button>
     </div>
   );

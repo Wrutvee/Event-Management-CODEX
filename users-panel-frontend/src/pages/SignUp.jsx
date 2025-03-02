@@ -1,34 +1,76 @@
-import React, { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { motion } from 'framer-motion'
-import Button from '../components/Button'
-import InputField from '../components/InputField'
-import SocialLogin from '../components/SocialLogin'
-import AnimatedCheckbox from '../components/AnimatedCheckbox'
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { motion } from 'framer-motion';
+import Button from '../components/Button';
+import InputField from '../components/InputField';
+import SocialLogin from '../components/SocialLogin';
+import AnimatedCheckbox from '../components/AnimatedCheckbox';
+import { toast } from 'react-hot-toast';
+import { isPasswordStrong, sanitizeInput } from '../utils/security';
+import axiosInstance from '../services/axiosConfig';
 
 function SignUp() {
-  const navigate = useNavigate()
-  const { register, handleSubmit, watch, formState: { errors } } = useForm()
-  const password = watch('password')
-  const [rememberMe, setRememberMe] = useState(false)
+  const navigate = useNavigate();
+  const { register, handleSubmit, watch, formState: { errors }, setError } = useForm();
+  const password = watch('password');
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({
+    isStrong: false,
+    message: ''
+  });
+
+  // Add password strength validation
+  const validatePassword = (value) => {
+    if (!value) return true;
+    
+    const isStrong = isPasswordStrong(value);
+    setPasswordStrength({
+      isStrong,
+      message: isStrong ? '' : 'Password must be at least 8 characters with uppercase, lowercase, number, and special character'
+    });
+    
+    return isStrong || 'Password is not strong enough';
+  };
 
   const onSubmit = async (data) => {
     try {
       if (data.password !== data.confirmPassword) {
-        setError('confirmPassword', { message: 'Passwords do not match' })
-        return
+        setError('confirmPassword', { message: 'Passwords do not match' });
+        return;
       }
+  
+      // Validate password strength
+      if (!isPasswordStrong(data.password)) {
+        setError('password', { 
+          message: 'Password must be at least 8 characters with uppercase, lowercase, number, and special character'
+        });
+        return;
+      }
+  
+      setIsLoading(true);
       
-      // Simulate signup success
-      localStorage.setItem('isAuthenticated', 'true')
-      localStorage.setItem('user', JSON.stringify(data))
-      navigate('/home', { replace: true })
+      // Sanitize inputs
+      const sanitizedData = {
+        name: sanitizeInput(data.name),
+        email: sanitizeInput(data.email),
+        password: data.password // Don't sanitize password
+      };
+      
+      const response = await axiosInstance.post('/auth/signup', sanitizedData);
+  
+      if (response.data.success) {
+        toast.success('Account created successfully!');
+        navigate('/login');
+      }
     } catch (error) {
-      console.error('Signup failed:', error)
+      console.error('Signup failed:', error);
+      toast.error(error.response?.data?.message || 'Signup failed');
+    } finally {
+      setIsLoading(false);
     }
-  }
-
+  };
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
@@ -79,6 +121,7 @@ function SignUp() {
                 })}
                 error={errors.name}
                 icon="fas fa-user"
+                disabled={isLoading}
               />
 
               <InputField
@@ -94,6 +137,7 @@ function SignUp() {
                 })}
                 error={errors.email}
                 icon="fas fa-envelope"
+                disabled={isLoading}
               />
 
               <InputField
@@ -102,13 +146,11 @@ function SignUp() {
                 autoComplete="new-password"
                 {...register('password', { 
                   required: 'Password is required',
-                  minLength: {
-                    value: 8,
-                    message: 'Password must be at least 8 characters'
-                  }
+                  validate: validatePassword
                 })}
                 error={errors.password}
                 icon="fas fa-lock"
+                disabled={isLoading}
               />
 
               <InputField
@@ -121,22 +163,30 @@ function SignUp() {
                 })}
                 error={errors.confirmPassword}
                 icon="fas fa-lock"
+                disabled={isLoading}
               />
             </motion.div>
 
             <div className="flex items-center mb-4">
               <AnimatedCheckbox
                 checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
+                onChange={() => setRememberMe(!rememberMe)}
+                label="I agree to the Terms of Service and Privacy Policy"
               />
             </div>
 
             <Button 
               type="submit" 
               fullWidth
+              disabled={isLoading}
               className="transition-transform hover:scale-105"
             >
-              Create Account
+              {isLoading ? (
+                <span className="flex items-center justify-center">
+                  <i className="fas fa-spinner fa-spin mr-2" />
+                  Creating Account...
+                </span>
+              ) : 'Create Account'}
             </Button>
           </form>
           
@@ -151,9 +201,6 @@ function SignUp() {
             </div>
 
             <SocialLogin />
-
-          
-          
           </div>
 
           <div className="mt-6 text-center">

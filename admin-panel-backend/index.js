@@ -9,6 +9,7 @@ const connectDB = require("./config/db");
 const eventRoutes = require("./routes/events");
 const inviteRoutes = require("./routes/inviteAdmins");
 const profileRoutes = require("./routes/profile");
+const uploadRoutes = require("./routes/upload");
 
 // Connect to MongoDB
 connectDB();
@@ -81,6 +82,7 @@ app.use("/auth", authRoutes);
 app.use("/events", eventRoutes);
 app.use("/invite", inviteRoutes);
 app.use("/profile", profileRoutes);
+app.use("/uploads", uploadRoutes);
 
 app.listen(3000, () => {
   console.log("server started");

@@ -30,7 +30,9 @@ export default function Navbar() {
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               />
 
-              <div className="flex-shrink-0 flex items-center">
+              <div
+               className="flex-shrink-0 flex items-center hover:cursor-pointer"
+                onClick={() => navigate('/home')}>
                 <img
                   className="h-7 md:h-8 w-auto"
                   src="/logos/main_logo.png"

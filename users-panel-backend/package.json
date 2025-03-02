@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,15 @@
   "bugs": {
     "url": "https://github.com/owaish3301/Event-Management-Users-Panel-Backend/issues"
   },
-  "homepage": "https://github.com/owaish3301/Event-Management-Users-Panel-Backend#readme"
+  "homepage": "https://github.com/owaish3301/Event-Management-Users-Panel-Backend#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "csrf": "^3.1.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.11.0"
+  }
 }
