@@ -34,3 +34,10 @@ chmod +x start.sh
   ~~- route to handle invitation of new admin ~~
   ~~- route to view and update profile of admins~~
   - Add all the necessary backend logic to handle the event page
+  
+  ## Users panel frontend :
+    - Create events page
+    - Fetch event lists from backend instead of mock data
+
+  ## Users panel backend :
+    - Create route to serve event data
