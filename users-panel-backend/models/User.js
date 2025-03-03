@@ -24,7 +24,26 @@ const UserSchema = new mongoose.Schema({
   profilePic: {
     type: String,
     default: null
-  }
+  },
+  registeredEvents: [{
+    eventId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'Event'
+    },
+    registrationDate: {
+      type: Date,
+      default: Date.now
+    },
+    additionalInfo: {
+      type: Map,
+      of: String,
+      default: new Map()
+    }
+  },
+  {
+    _id: false
+  }],
 }, {
   timestamps: true
 });

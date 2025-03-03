@@ -1,11 +1,11 @@
 {
   "folders": [
-    {
-      "path": "admin-panel-frontend"
-    },
-    {
-      "path": "admin-panel-backend"
-    },
+    // {
+    //   "path": "admin-panel-frontend"
+    // },
+    // {
+    //   "path": "admin-panel-backend"
+    // },
     {
       "path": "users-panel-frontend"
     },

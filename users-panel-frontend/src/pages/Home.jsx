@@ -1,77 +1,39 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useEvents } from '../context/EventContext';
 import Header from '../components/Header';
 import EventCard from '../components/EventCard';
-import { fetchPublicEvents, fetchUpcomingEvents, fetchPastEvents, fetchMyEvents } from '../services/eventService';
 import { toast } from 'react-hot-toast';
 
 function Home() {
   const [activeTab, setActiveTab] = useState('upcoming');
   const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
   const plusButtonRef = useRef(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [eventsByType, setEventsByType] = useState({
-    my: [],
-    upcoming: [],
-    past: []
-  });
   
-  // Get events based on active tab
-  const currentEvents = eventsByType[activeTab] || [];
+  // Get events context
+  const { 
+    events, 
+    isInitialLoading, 
+    error, 
+    loadMoreEvents,
+    refreshEvents 
+  } = useEvents();
 
-  // Fetch events from backend
-  useEffect(() => {
-    const fetchEvents = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch events based on active tab
-        if (activeTab === 'upcoming') {
-          const events = await fetchUpcomingEvents();
-          setEventsByType(prev => ({ ...prev, upcoming: events }));
-        } else if (activeTab === 'past') {
-          const events = await fetchPastEvents();
-          setEventsByType(prev => ({ ...prev, past: events }));
-        } else if (activeTab === 'my') {
-          const events = await fetchMyEvents();
-          setEventsByType(prev => ({ ...prev, my: events }));
-        }
-      } catch (error) {
-        console.error(`Error fetching ${activeTab} events:`, error);
-        toast.error(`Failed to load ${activeTab} events`);
-        
-        // Try to fetch all events as fallback
-        try {
-          const allEvents = await fetchPublicEvents();
-          const now = new Date();
-          
-          // Sort events into categories
-          const upcoming = allEvents.filter(event => {
-            const eventDate = new Date(event.dateTime?.start || event.date);
-            return eventDate > now;
-          });
-          
-          const past = allEvents.filter(event => {
-            const eventDate = new Date(event.dateTime?.start || event.date);
-            return eventDate <= now;
-          });
-          
-          // Update the relevant category
-          if (activeTab === 'upcoming') {
-            setEventsByType(prev => ({ ...prev, upcoming }));
-          } else if (activeTab === 'past') {
-            setEventsByType(prev => ({ ...prev, past }));
-          }
-        } catch (fallbackError) {
-          console.error('Fallback error:', fallbackError);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchEvents();
-  }, [activeTab]);
+  // Get current events based on active tab
+  const currentEvents = events[activeTab]?.data || [];
+  const isLoading = events[activeTab]?.loading || isInitialLoading;
+  const hasMore = events[activeTab]?.hasMore || false;
 
+  // Handle loading more events
+  const handleLoadMore = async () => {
+    try {
+      await loadMoreEvents(activeTab);
+    } catch (error) {
+      toast.error('Failed to load more events');
+    }
+  };
+
+  // Handle click outside of plus menu
   useEffect(() => {
     function handleClickOutside(event) {
       if (plusButtonRef.current && !plusButtonRef.current.contains(event.target)) {
@@ -80,14 +42,12 @@ function Home() {
     }
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
-      {/* Add backdrop overlay when menu is open */}
+      {/* Backdrop overlay */}
       {isPlusMenuOpen && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-25 transition-opacity duration-200 z-40"
@@ -145,28 +105,37 @@ function Home() {
             {/* Events Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {isLoading ? (
-                // Loading skeleton
-                [...Array(3)].map((_, i) => (
+                // Loading skeletons
+                [...Array(6)].map((_, i) => (
                   <div key={i} className="animate-pulse bg-white rounded-lg shadow-md p-4 h-80">
                     <div className="bg-gray-200 h-40 rounded-md mb-4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
-                    <div className="h-3 bg-gray-200 rounded w-5/6 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-4/6"></div>
-                    <div className="mt-4 flex justify-between items-center">
-                      <div className="h-3 bg-gray-200 rounded w-1/4"></div>
-                      <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+                    <div className="space-y-3">
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+                      <div className="mt-4 flex justify-between">
+                        <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+                        <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+                      </div>
                     </div>
                   </div>
                 ))
+              ) : error ? (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-red-600">{error}</p>
+                  <button 
+                    onClick={refreshEvents}
+                    className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                  >
+                    Try Again
+                  </button>
+                </div>
               ) : currentEvents.length > 0 ? (
                 currentEvents.map((event, index) => (
                   <div 
-                    key={event._id || event.id}
+                    key={event._id}
                     className="animate-fadeIn transform transition-all duration-300 hover:scale-[1.02]"
-                    style={{
-                      animationDelay: `${index * 100}ms`
-                    }}
+                    style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <EventCard event={event} />
                   </div>
@@ -184,52 +153,61 @@ function Home() {
                 </div>
               )}
             </div>
+
+            {/* Load More Button */}
+            {hasMore && !isLoading && (
+              <div className="mt-8 text-center">
+                <button
+                  onClick={handleLoadMore}
+                  className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 
+                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Load More
+                </button>
+              </div>
+            )}
           </main>
         </div>
       </div>
 
-      {/* Floating Action Button */}
-      <div 
-        className="fixed bottom-6 right-6 z-50 animate-float" 
-        ref={plusButtonRef}
-      >
+      {/* Quick Actions FAB */}
+      <div className="fixed bottom-6 right-6 z-50" ref={plusButtonRef}>
         <button
           onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
-          className="w-14 h-14 sm:w-16 sm:h-16 bg-indigo-600 rounded-full flex items-center justify-center 
-          text-white shadow-xl hover:bg-indigo-700 focus:outline-none transition-all duration-300 
-          transform hover:scale-110"
+          className="w-14 h-14 bg-indigo-600 rounded-full flex items-center justify-center 
+            text-white shadow-xl hover:bg-indigo-700 focus:outline-none transform hover:scale-110 
+            transition-all duration-300"
         >
           <svg
-            className={`h-8 w-8 sm:h-10 sm:w-10 transition-transform duration-300 ${
+            className={`h-8 w-8 transition-transform duration-300 ${
               isPlusMenuOpen ? 'rotate-45' : ''
             }`}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
-            strokeWidth={2.5}
           >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
+              strokeWidth={2}
               d="M12 6v6m0 0v6m0-6h6m-6 0H6"
             />
           </svg>
         </button>
 
-        {/* Floating Menu - Improved Styling */}
+        {/* Quick Actions Menu */}
         {isPlusMenuOpen && (
-          <div className="absolute bottom-full right-0 mb-4 w-56 bg-white rounded-lg shadow-2xl py-2 border border-gray-100 overflow-hidden">
-            <div className="px-4 py-2 border-b border-gray-100 mb-1">
+          <div className="absolute bottom-full right-0 mb-4 w-56 bg-white rounded-lg shadow-2xl py-2">
+            <div className="px-4 py-2 border-b border-gray-100">
               <h3 className="text-sm font-medium text-gray-700">Quick Actions</h3>
             </div>
-            {['certificates', 'help'].map((item, index) => (
+            {['certificates', 'help'].map(item => (
               <Link
                 key={item}
                 to={`/${item}`}
-                className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 
-                  transition-all duration-200 group"
+                className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 transition-all duration-200"
               >
-                <span className="w-8 h-8 mr-3 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-600 group-hover:bg-indigo-200 transition-colors">
+                <span className="w-8 h-8 mr-3 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
                   {item === 'certificates' ? (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />

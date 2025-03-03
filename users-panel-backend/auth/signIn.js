@@ -5,7 +5,10 @@ const jwt = require('jsonwebtoken');
 const signIn = async (req, res) => {
   try {
     const { email, password, rememberMe } = req.body;
-    const user = await User.findOne({ email });
+    
+    // Find user
+    const user = await User.findOne({ email }).lean();
+    
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -13,6 +16,7 @@ const signIn = async (req, res) => {
       });
     }
 
+    // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({
@@ -21,19 +25,15 @@ const signIn = async (req, res) => {
       });
     }
 
-    // Set expiration based on rememberMe
-    const expiresIn = rememberMe ? '7d' : '24h';
-
     // Generate JWT
     const token = jwt.sign(
-      { id: user._id },
+      { id: user._id.toString() },
       process.env.JWT_SECRET,
-      { expiresIn }
+      { expiresIn: rememberMe ? '7d' : '24h' }
     );
 
-    // Set HTTP-only cookie with appropriate expiration
+    // Set HTTP-only cookie
     const maxAge = rememberMe ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
-    
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -41,10 +41,12 @@ const signIn = async (req, res) => {
       maxAge
     });
 
+    // Send response
     res.json({
       success: true,
+      message: 'Login successful',
       user: {
-        id: user._id,
+        id: user._id.toString(),
         name: user.name,
         email: user.email
       }

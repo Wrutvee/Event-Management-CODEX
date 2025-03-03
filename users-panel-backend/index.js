@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const { csrfProtection, generateToken } = require('./middlewares/csrf');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
+const eventsRoutes = require('./routes/events');
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use(csrfProtection);
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/events', eventsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

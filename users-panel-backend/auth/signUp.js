@@ -26,14 +26,15 @@ const signUp = async (req, res) => {
     const user = new User({
       name,
       email,
-      password // Password will be hashed by the pre-save middleware
+      password, // Password will be hashed by the pre-save middleware
+      registeredEvents: []
     });
 
     await user.save();
 
     // Generate JWT
     const token = jwt.sign(
-      { id: user._id },
+      { id: user._id.toString() },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -48,8 +49,9 @@ const signUp = async (req, res) => {
 
     res.status(201).json({
       success: true,
+      message: 'Registration successful',
       user: {
-        id: user._id,
+        id: user._id.toString(), // Explicitly convert to string
         name: user.name,
         email: user.email
       }
@@ -59,7 +61,7 @@ const signUp = async (req, res) => {
     console.error('Signup error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error creating user'
+      message: error.message || 'Error creating user'
     });
   }
 };

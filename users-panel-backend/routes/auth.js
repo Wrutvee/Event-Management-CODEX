@@ -25,7 +25,7 @@ router.get('/verify', verifyToken, async (req, res) => {
     res.json({
       success: true,
       user: {
-        id: user._id,
+        id: user._id.toString(), // Explicitly convert to string
         name: user.name,
         email: user.email
       }
