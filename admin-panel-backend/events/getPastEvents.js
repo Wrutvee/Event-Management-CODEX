@@ -11,7 +11,7 @@ const getPastEvents = async (req, res) => {
         // Query past events
         const events = await Event.find({
           visibility: "public",
-          "dateTime.end": { $lt: currentDate },
+          "dateTime.start": { $lt: currentDate },
           status: { $ne: "cancelled" },
         })
           .sort({ "dateTime.end": -1 }) // Sort by end date, most recent first
@@ -24,7 +24,7 @@ const getPastEvents = async (req, res) => {
         const totalEvents = await Event.countDocuments({
           status: { $ne: "cancelled" },
           visibility: "public",
-          "dateTime.end": { $lt: currentDate },
+          "dateTime.start": { $lt: currentDate },
         });
 
         res.json({

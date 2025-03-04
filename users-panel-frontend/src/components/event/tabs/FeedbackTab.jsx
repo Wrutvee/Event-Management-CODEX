@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MessageSquare, Star, Send, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import axiosInstance from '../../../services/axiosConfig';
 
 function FeedbackTab({ event, isRegistered }) {
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
@@ -13,7 +14,9 @@ function FeedbackTab({ event, isRegistered }) {
         <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-4">
           <MessageSquare className="w-8 h-8 text-gray-400" />
         </div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">Registration Required</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          Registration Required
+        </h3>
         <p className="text-gray-500 text-center max-w-md">
           Please register for the event to provide your valuable feedback.
         </p>
@@ -27,7 +30,9 @@ function FeedbackTab({ event, isRegistered }) {
         <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-4">
           <MessageSquare className="w-8 h-8 text-gray-400" />
         </div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">Feedback Not Available</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          Feedback Not Available
+        </h3>
         <p className="text-gray-500 text-center max-w-md">
           Feedback collection has not been enabled for this event yet.
         </p>
@@ -43,26 +48,30 @@ function FeedbackTab({ event, isRegistered }) {
         </div>
         <h3 className="text-xl font-semibold text-gray-900 mb-2">Thank You!</h3>
         <p className="text-gray-500 text-center max-w-md">
-          Your feedback has been submitted successfully. We appreciate your input and will use it to improve future events.
+          Your feedback has been submitted successfully. We appreciate your
+          input and will use it to improve future events.
         </p>
       </div>
     );
   }
 
   const handleInputChange = (questionId, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [questionId]: value
+      [questionId]: value,
     }));
   };
 
+  // In FeedbackTab.jsx
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    
-    const requiredQuestions = event.feedback.questions.filter(q => q.required);
-    const missingRequired = requiredQuestions.filter(q => !formData[q.text]);
-    
+
+    const requiredQuestions = event.feedback.questions.filter(
+      (q) => q.required
+    );
+    const missingRequired = requiredQuestions.filter((q) => !formData[q.text]);
+
     if (missingRequired.length > 0) {
       toast.error("Please answer all required questions");
       setSubmitting(false);
@@ -70,12 +79,31 @@ function FeedbackTab({ event, isRegistered }) {
     }
 
     try {
-      // Call your API here
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      // Format responses according to the Feedback model structure
+      const responses = event.feedback.questions.map((question) => ({
+        question: {
+          id: question._id,
+          text: question.text,
+          type: question.type,
+        },
+        answer: formData[question.text],
+      }));
+
+      const response = await axiosInstance.post(
+        `/events/${event._id}/feedback`,
+        {
+          responses,
+        }
+      );
+
+      if (!response.data.success) {
+        throw new Error(response.data.message);
+      }
+
       setFeedbackSubmitted(true);
       toast.success("Feedback submitted successfully!");
     } catch (error) {
-      toast.error("Failed to submit feedback");
+      toast.error(error.response?.data?.message || "Failed to submit feedback");
     } finally {
       setSubmitting(false);
     }
@@ -83,47 +111,66 @@ function FeedbackTab({ event, isRegistered }) {
 
   const renderQuestionInput = (question) => {
     switch (question.type) {
-      case 'star':
+      case "star":
         return (
           <div className="flex flex-col space-y-2">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map(rating => (
+                {[1, 2, 3, 4, 5].map((rating) => (
                   <button
                     key={rating}
                     type="button"
                     onClick={() => handleInputChange(question.text, rating)}
                     className="relative group p-1.5"
                   >
-                    <Star 
+                    <Star
                       className={`w-8 h-8 transform transition-all duration-200 
-                        ${formData[question.text] >= rating 
-                          ? 'text-yellow-400 scale-105 filter drop-shadow-md' 
-                          : 'text-gray-200 hover:text-yellow-300 hover:scale-105'
+                        ${
+                          formData[question.text] >= rating
+                            ? "text-yellow-400 scale-105 filter drop-shadow-md"
+                            : "text-gray-200 hover:text-yellow-300 hover:scale-105"
                         } 
-                        ${formData[question.text] === rating ? 'animate-pulse' : ''}
+                        ${
+                          formData[question.text] === rating
+                            ? "animate-pulse"
+                            : ""
+                        }
                       `}
-                      fill={formData[question.text] >= rating ? 'currentColor' : 'none'}
+                      fill={
+                        formData[question.text] >= rating
+                          ? "currentColor"
+                          : "none"
+                      }
                       strokeWidth={1.5}
                     />
                     <span className="sr-only">Rate {rating} stars</span>
-                    
+
                     {/* Tooltip */}
                     <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                      {rating === 1 ? 'Poor' : 
-                      rating === 2 ? 'Fair' : 
-                      rating === 3 ? 'Good' : 
-                      rating === 4 ? 'Very Good' : 'Excellent'}
+                      {rating === 1
+                        ? "Poor"
+                        : rating === 2
+                        ? "Fair"
+                        : rating === 3
+                        ? "Good"
+                        : rating === 4
+                        ? "Very Good"
+                        : "Excellent"}
                     </span>
                   </button>
                 ))}
               </div>
               {formData[question.text] && (
                 <span className="text-sm font-medium text-gray-600 animate-fade-in">
-                  {formData[question.text] === 1 ? 'Poor' : 
-                  formData[question.text] === 2 ? 'Fair' : 
-                  formData[question.text] === 3 ? 'Good' : 
-                  formData[question.text] === 4 ? 'Very Good' : 'Excellent'}
+                  {formData[question.text] === 1
+                    ? "Poor"
+                    : formData[question.text] === 2
+                    ? "Fair"
+                    : formData[question.text] === 3
+                    ? "Good"
+                    : formData[question.text] === 4
+                    ? "Very Good"
+                    : "Excellent"}
                 </span>
               )}
             </div>
@@ -134,19 +181,19 @@ function FeedbackTab({ event, isRegistered }) {
             </div>
           </div>
         );
-      
-      case 'text':
+
+      case "text":
         return (
           <textarea
             className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
             rows="3"
             placeholder="Your answer"
-            value={formData[question.text] || ''}
+            value={formData[question.text] || ""}
             onChange={(e) => handleInputChange(question.text, e.target.value)}
           />
         );
-      
-      case 'slider':
+
+      case "slider":
         return (
           <div className="space-y-3 touch-none">
             <div className="flex items-center gap-4">
@@ -156,15 +203,21 @@ function FeedbackTab({ event, isRegistered }) {
                 max="10"
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary touch-none"
                 value={formData[question.text] || 5}
-                onChange={(e) => handleInputChange(question.text, parseInt(e.target.value))}
+                onChange={(e) =>
+                  handleInputChange(question.text, parseInt(e.target.value))
+                }
                 onTouchMove={(e) => {
                   e.preventDefault(); // Prevent page scroll while sliding
                   e.stopPropagation();
                 }}
                 style={{
                   // Custom slider styling for better mobile experience
-                  WebkitAppearance: 'none',
-                  background: `linear-gradient(to right, #4f46e5 0%, #4f46e5 ${((formData[question.text] || 5) - 1) * 11.11}%, #e5e7eb ${((formData[question.text] || 5) - 1) * 11.11}%, #e5e7eb 100%)`
+                  WebkitAppearance: "none",
+                  background: `linear-gradient(to right, #4f46e5 0%, #4f46e5 ${
+                    ((formData[question.text] || 5) - 1) * 11.11
+                  }%, #e5e7eb ${
+                    ((formData[question.text] || 5) - 1) * 11.11
+                  }%, #e5e7eb 100%)`,
                 }}
               />
               <span className="w-8 h-8 flex items-center justify-center bg-primary text-white rounded-full text-sm font-medium shrink-0">
@@ -179,12 +232,12 @@ function FeedbackTab({ event, isRegistered }) {
           </div>
         );
 
-      case 'choice':
+      case "choice":
         return (
           <div className="space-y-2">
             {question.options.map((option, idx) => (
-              <label 
-                key={idx} 
+              <label
+                key={idx}
                 className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 <div className="relative flex items-center justify-center">
@@ -193,7 +246,9 @@ function FeedbackTab({ event, isRegistered }) {
                     name={question.text}
                     value={option}
                     checked={formData[question.text] === option}
-                    onChange={(e) => handleInputChange(question.text, e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange(question.text, e.target.value)
+                    }
                     className="h-5 w-5 text-primary focus:ring-primary/50 border-gray-300"
                   />
                 </div>
@@ -202,7 +257,7 @@ function FeedbackTab({ event, isRegistered }) {
             ))}
           </div>
         );
-      
+
       default:
         return (
           <div className="flex items-center gap-2 text-red-500 p-3 bg-red-50 rounded-lg">
@@ -221,9 +276,12 @@ function FeedbackTab({ event, isRegistered }) {
             <MessageSquare className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Event Feedback</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Event Feedback
+            </h3>
             <p className="text-gray-600">
-              Your feedback helps us improve future events. Thank you for taking the time to share your thoughts.
+              Your feedback helps us improve future events. Thank you for taking
+              the time to share your thoughts.
             </p>
           </div>
         </div>
@@ -242,10 +300,14 @@ function FeedbackTab({ event, isRegistered }) {
               <div>
                 <label className="block text-gray-900 font-medium">
                   {question.text}
-                  {question.required && <span className="text-red-500 ml-1">*</span>}
+                  {question.required && (
+                    <span className="text-red-500 ml-1">*</span>
+                  )}
                 </label>
                 {question.description && (
-                  <p className="text-sm text-gray-500 mt-1">{question.description}</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {question.description}
+                  </p>
                 )}
               </div>
             </div>
@@ -261,9 +323,24 @@ function FeedbackTab({ event, isRegistered }) {
           >
             {submitting ? (
               <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
                 Submitting...
               </>

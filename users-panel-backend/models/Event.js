@@ -92,7 +92,8 @@ const EventSchema = new mongoose.Schema({
       options: [String],
       required: { type: Boolean, default: true },
       order: { type: Number }
-    }]
+    }],
+    responseIds: [String]
   }
 }, {
   timestamps: true

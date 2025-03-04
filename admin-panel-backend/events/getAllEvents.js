@@ -30,7 +30,7 @@ const getAllEvents = async (req, res) => {
         // Get past events
         const pastEvents = await Event.find({
           visibility: "public",
-          "dateTime.end": { $lt: currentDate },
+          "dateTime.start": { $lt: currentDate },
           status: { $ne: "cancelled" },
         })
           .sort({ "dateTime.end": -1 })
@@ -40,7 +40,7 @@ const getAllEvents = async (req, res) => {
 
         const totalPast = await Event.countDocuments({
           visibility: "public",
-          "dateTime.end": { $lt: currentDate },
+          "dateTime.start": { $lt: currentDate },
           status: { $ne: "cancelled" },
         });
 
