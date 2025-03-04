@@ -6,6 +6,7 @@ import SignUp from './pages/SignUp';
 import Home from './pages/Home';
 import Notifications from './pages/Notification';
 import EventPage from './pages/EventPage';
+import ProfilePage from './pages/ProfilePage'; // Add this import
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -36,6 +37,12 @@ function App() {
         <Route path="/notifications" element={
           <ProtectedRoute>
             <Notifications />
+          </ProtectedRoute>
+        } />
+        {/* Add Profile Route */}
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <ProfilePage />
           </ProtectedRoute>
         } />
 

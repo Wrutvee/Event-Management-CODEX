@@ -104,6 +104,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Add updateUser function
+  const updateUser = (updatedUserData) => {
+    setUser(prevUser => ({
+      ...prevUser,
+      ...updatedUserData
+    }));
+  };
+
   const logout = async () => {
     try {
       if (user?.role === 'admin') {
@@ -128,6 +136,7 @@ export const AuthProvider = ({ children }) => {
       isLoading, 
       login, 
       logout,
+      updateUser, // Add updateUser to the context value
       isAuthenticated: !!user 
     }}>
       {children}
@@ -138,7 +147,9 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
+
+export default AuthContext;

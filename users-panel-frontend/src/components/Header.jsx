@@ -1,16 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import EventCalendarDropdown from './EventCalendarDropdown';
 
 function Header() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isEventHubOpen, setIsEventHubOpen] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const { user, logout } = useAuth();
   const notificationRef = useRef(null);
   const profileRef = useRef(null);
   const eventHubRef = useRef(null);
+  const calendarRef = useRef(null);
   const navigate = useNavigate();
 
   const handleEventHubClick = () => {
@@ -35,7 +38,11 @@ function Header() {
       setIsNotificationsOpen(!isNotificationsOpen);
     }
   };
-
+  // Handle calendar click
+  const handleCalendarClick = () => {
+    setIsCalendarOpen(!isCalendarOpen);
+  };
+  
   useEffect(() => {
     function handleClickOutside(event) {
       // Handle notification dropdown
@@ -47,17 +54,19 @@ function Header() {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileOpen(false);
       }
-
+  
       // Handle eventHub dropdown
       if (eventHubRef.current && !eventHubRef.current.contains(event.target)) {
         setIsEventHubOpen(false);
       }
+      
+      // Calendar dropdown is handled within the component itself
     }
-
+  
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
+  
   return (
     <>
       {/* Backdrop overlay */}
@@ -70,7 +79,7 @@ function Header() {
           }}
         />
       )}
-
+  
       <header className="bg-white shadow-lg relative z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
@@ -86,9 +95,10 @@ function Header() {
                 </span>
               </Link>
             </div>
-
-            {/* Right section */}
+  {/* Right section */}
             <div className="flex items-center space-x-4">
+              {/* Calendar Button removed from here */}
+  
               {/* Notification Bell */}
               <div className="relative" ref={notificationRef}>
                 <button
@@ -116,7 +126,7 @@ function Header() {
                     />
                   </svg>
                 </button>
-
+  
                 {/* Desktop Notification Dropdown */}
                 {!isMobile && isNotificationsOpen && (
                   <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg py-2 border border-gray-100 z-50">
@@ -137,7 +147,7 @@ function Header() {
                   </div>
                 )}
               </div>
-
+  
               {!user && (
                 <Link
                   to="/login"
@@ -146,7 +156,7 @@ function Header() {
                   Log in
                 </Link>
               )}
-
+  
               {/* Profile Dropdown */}
               <div className="relative" ref={profileRef}>
                 <button
@@ -166,7 +176,7 @@ function Header() {
                     backgroundPosition: "center",
                   }}
                 ></button>
-
+  
                 {isProfileOpen && (
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl py-2 z-50">
                     <div className="px-4 py-3 border-b border-gray-100">
@@ -208,8 +218,14 @@ function Header() {
                         </svg>
                         Your Profile
                       </Link>
+                      {/* Changed Event Calendar button to Link with onClick handler */}
                       <Link
-                        to="/calendar"
+                        to="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setIsCalendarOpen(!isCalendarOpen);
+                          setIsProfileOpen(false);
+                        }}
                         className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 transition-colors duration-150"
                       >
                         <svg
@@ -255,6 +271,19 @@ function Header() {
           </div>
         </div>
       </header>
+      {/* Calendar Dropdown - Updated for better mobile responsiveness */}
+      {isCalendarOpen && (
+        <div 
+          className={`fixed ${isMobile ? 'inset-0 flex items-center justify-center' : 'top-16 right-4'} z-50`} 
+          ref={calendarRef}
+        >
+          <EventCalendarDropdown 
+            isOpen={isCalendarOpen} 
+            onClose={() => setIsCalendarOpen(false)} 
+            isMobile={isMobile}
+          />
+        </div>
+      )}
     </>
   );
 }
