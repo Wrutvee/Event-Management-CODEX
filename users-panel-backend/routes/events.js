@@ -22,7 +22,7 @@ router.get('/all', verifyToken, async (req, res) => {
 
       // Get past events
       Event.find({
-        "dateTime.end": { $lt: currentDate },
+        "dateTime.start": { $lt: currentDate },
         visibility: "public",
         status: { $ne: "cancelled" }
       })
@@ -46,7 +46,7 @@ router.get('/all', verifyToken, async (req, res) => {
         status: { $ne: "cancelled" }
       }),
       Event.countDocuments({
-        "dateTime.end": { $lt: currentDate },
+        "dateTime.start": { $lt: currentDate },
         visibility: "public",
         status: { $ne: "cancelled" }
       }),
@@ -108,7 +108,7 @@ router.get('/:category', verifyToken, async (req, res) => {
 
       case 'past':
         query = {
-          "dateTime.end": { $lt: currentDate },
+          "dateTime.start": { $lt: currentDate },
           visibility: "public",
           status: { $ne: "cancelled" }
         };

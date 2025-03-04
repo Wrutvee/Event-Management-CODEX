@@ -1,10 +1,12 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
+import { useAuth } from '../context/AuthContext';
 
 function EventCard({ event }) {
   const navigate = useNavigate();
-  
+  const { user } = useAuth();
+
   // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return 'Date TBD';
@@ -23,12 +25,35 @@ function EventCard({ event }) {
   const formattedDate = formatDate(eventDate);
   
   // Handle different image formats
-  const imageUrl = event.coverPhoto || event.image || event.eventImage || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87';
+  const imageUrl = event.coverPhoto || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87';
   
   // Get event status
   const getEventStatus = () => {
-    if (event.isRegistered) return 'Registered';
-    if (event.isFull) return 'Full';
+    // Check if user is registered
+    if (event.registeredUsers?.includes(user?.id)) {
+      return 'Registered';
+    }
+
+    // Check if event is full
+    if (event.capacity?.required && 
+        event.registeredUsers?.length >= event.capacity.maxParticipants) {
+      return 'Full';
+    }
+
+    // Check if registration deadline has passed
+    if (event.registration?.isRequired && event.registration?.deadline) {
+      const deadlineDate = new Date(event.registration.deadline);
+      if (deadlineDate < new Date()) {
+        return 'Closed';
+      }
+    }
+
+    // Check if event has started
+    if (event.dateTime?.start && new Date(event.dateTime.start) < new Date()) {
+      return 'Started';
+    }
+
+    // If none of the above conditions are met, the event is open for registration
     return 'Open';
   };
   
@@ -88,6 +113,8 @@ function EventCard({ event }) {
             inline-block px-2 py-1 text-xs font-semibold rounded-full
             ${getEventStatus() === 'Registered' ? 'bg-green-100 text-green-800' : 
               getEventStatus() === 'Full' ? 'bg-red-100 text-red-800' : 
+              getEventStatus() === 'Closed' ? 'bg-gray-100 text-gray-800' :
+              getEventStatus() === 'Started' ? 'bg-yellow-100 text-yellow-800' :
               'bg-blue-100 text-blue-800'}
           `}>
             {getEventStatus()}

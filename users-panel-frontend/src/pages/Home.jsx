@@ -77,13 +77,13 @@ function Home() {
 
             {/* Tabs Navigation */}
             <div className="mb-6 sm:mb-8">
-              <nav className="flex space-x-4 sm:space-x-8">
+              <nav className="flex justify-center space-x-2 sm:space-x-8">
                 {['my', 'upcoming', 'past'].map((tab, index) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     className={`
-                      whitespace-nowrap py-2 sm:py-3 px-4 sm:px-6 text-sm sm:text-base font-semibold rounded-md
+                      whitespace-nowrap py-2 sm:py-3 px-3 sm:px-6 text-sm sm:text-base font-semibold rounded-md
                       transition-all duration-300 transform hover:scale-105
                       ${activeTab === tab 
                         ? 'bg-indigo-600 text-white shadow-lg hover:bg-indigo-700'
