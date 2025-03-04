@@ -3,18 +3,22 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { toast } from 'react-hot-toast';
 import { useEvents } from '../context/EventContext';
+import { useAuth } from '../context/AuthContext'; // Add this import
 import Header from '../components/Header';
 import EventTabs from '../components/event/EventTabs';
 import MediaCarousel from "../components/event/MediaCarousel";
 import axiosInstance from '../services/axiosConfig';
+import RegistrationModal from '../components/event/RegistrationModal';
 
 export default function EventPage() {
   const { eventId } = useParams();
   const navigate = useNavigate();
-  const { events, isInitialLoading, fetchAllEvents, getEventById } = useEvents();
+  const { user } = useAuth(); // Get user from AuthContext
+  const { events, isInitialLoading, getEventById, refreshEvents } = useEvents();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -49,23 +53,27 @@ export default function EventPage() {
   }, [eventId, events, isInitialLoading, getEventById]);
 
   // Handle registration
-  const handleRegister = async () => {
+  const handleRegister = async (registrationData) => {
     try {
       setRegistering(true);
-      const response = await axiosInstance.post(`/events/${eventId}/register`);
+      const response = await axiosInstance.post(`/events/${eventId}/register`, registrationData);
       
       if (!response.data.success) {
         throw new Error(response.data.message || 'Registration failed');
       }
 
-      // Refresh events data after successful registration
-      await fetchAllEvents();
+      await refreshEvents();
       toast.success('Successfully registered for the event!');
+      setShowRegistrationModal(false);
     } catch (error) {
       toast.error(error.message || 'Failed to register for the event');
     } finally {
       setRegistering(false);
     }
+  };
+
+  const handleRegistrationClick = () => {
+    setShowRegistrationModal(true);
   };
 
   const formatDate = (dateString) => {
@@ -113,7 +121,8 @@ export default function EventPage() {
   const isRegistrationOpen = event.registration.isRequired ? 
     new Date() < new Date(event.registration.deadline) : true;
 
-  const isRegistered = event.registeredUsers?.includes(event.userId);
+  // Update this check to use user ID from AuthContext
+  const isRegistered = user && event.registeredUsers?.includes(user.id);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
@@ -142,12 +151,13 @@ export default function EventPage() {
           </div>
 
           <button
-            onClick={handleRegister}
-            disabled={isRegistered || registering || isEventFull || !isRegistrationOpen}
+            onClick={handleRegistrationClick}
+            disabled={isRegistered || registering || isEventFull || !isRegistrationOpen || !user}
             className={`
               px-6 py-3 rounded-lg font-semibold text-white shadow-md
               transition-all duration-200 transform hover:scale-105 active:scale-95
-              ${isRegistered ? 'bg-green-600 cursor-default' :
+              ${!user ? 'bg-gray-600 cursor-not-allowed' :
+                isRegistered ? 'bg-green-600 cursor-default' :
                 isEventFull ? 'bg-red-600 cursor-not-allowed' :
                 !isRegistrationOpen ? 'bg-gray-600 cursor-not-allowed' :
                 'bg-indigo-600 hover:bg-indigo-700'}
@@ -161,7 +171,8 @@ export default function EventPage() {
                 </svg>
                 Registering...
               </span>
-            ) : isRegistered ? 'Registered' :
+            ) : !user ? 'Login to Register' :
+              isRegistered ? 'Registered' :
               isEventFull ? 'Event Full' :
               !isRegistrationOpen ? 'Registration Closed' :
               'Register Now'}
@@ -173,6 +184,14 @@ export default function EventPage() {
           isRegistered={isRegistered}
         />
       </div>
+
+      {showRegistrationModal && (
+        <RegistrationModal
+          event={event}
+          onSubmit={handleRegister}
+          onClose={() => setShowRegistrationModal(false)}
+        />
+      )}
     </div>
   );
 }

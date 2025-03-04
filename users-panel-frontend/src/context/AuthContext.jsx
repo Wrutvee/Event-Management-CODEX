@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
     } catch (userError) {
       try {
         // If user verification fails, try admin panel backend
-        const adminResponse = await axiosInstance.get('http://localhost:3000/api/auth/verify', {
+        const adminResponse = await axiosInstance.get('/auth/verify', {
           withCredentials: true
         });
         if (adminResponse.data.success) {
@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
     } catch (userError) {
       try {
         // If user login fails, try admin login
-        const adminLoginResponse = await axiosInstance.post('http://localhost:3000/api/auth/signin', {
+        const adminLoginResponse = await axiosInstance.post('/auth/signin', {
           email,
           password,
           rememberMe
@@ -107,7 +107,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       if (user?.role === 'admin') {
-        await axiosInstance.post('http://localhost:3000/api/auth/logout', {}, {
+        await axiosInstance.post('/auth/logout', {}, {
           withCredentials: true
         });
       } else {

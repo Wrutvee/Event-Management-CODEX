@@ -26,8 +26,22 @@ export default {
           '50%': { transform: 'translateY(-10px)' }
         },
       },
+      colors: {
+        primary: {
+          DEFAULT: "#4f46e5", // Indigo-600 to match your existing theme
+          foreground: "#ffffff",
+        }
+      }
     },
   },
+  variants: {
+    extend: {
+      appearance: ['hover', 'focus'],
+    },
+  },
+  safelist: [
+    'touch-none'
+  ],
   plugins: [
     require('@tailwindcss/forms'),
   ],

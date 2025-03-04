@@ -35,13 +35,20 @@ const UserSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     },
-    additionalInfo: {
-      type: Map,
-      of: String,
-      default: new Map()
+    formResponses: {
+      formFields: {
+        type: Map,
+        of: new mongoose.Schema({
+          question: String,
+          answer: String
+        }, { _id: false })
+      },
+      additionalInfo: {
+        question: String,
+        answer: String
+      }
     }
-  },
-  {
+  }, {
     _id: false
   }],
 }, {
