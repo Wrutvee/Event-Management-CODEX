@@ -4,10 +4,13 @@ import { useEvents } from '../context/EventContext';
 import Header from '../components/Header';
 import EventCard from '../components/EventCard';
 import { toast } from 'react-hot-toast';
+import HelpMenu from '../components/HelpMenu'; // Import HelpMenu component
+import PlusMenu from '../components/PlusMenu'; // Import PlusMenu component
 
 function Home() {
   const [activeTab, setActiveTab] = useState('upcoming');
   const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
+  const [isHelpMenuOpen, setIsHelpMenuOpen] = useState(false); // Add state for help menu
   const plusButtonRef = useRef(null);
   
   // Get events context
@@ -32,7 +35,18 @@ function Home() {
       toast.error('Failed to load more events');
     }
   };
-
+  
+  // Handle opening help menu
+  const handleHelpClick = () => {
+    setIsHelpMenuOpen(true);
+    setIsPlusMenuOpen(false); // Close plus menu when help opens
+  };
+  
+  // Handle closing help menu
+  const handleHelpClose = () => {
+    setIsHelpMenuOpen(false);
+  };
+  
   // Handle click outside of plus menu
   useEffect(() => {
     function handleClickOutside(event) {
@@ -40,11 +54,7 @@ function Home() {
         setIsPlusMenuOpen(false);
       }
     }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
       {/* Backdrop overlay */}
@@ -54,7 +64,7 @@ function Home() {
           onClick={() => setIsPlusMenuOpen(false)}
         />
       )}
-
+  
       <Header />
       
       {/* Main Content */}
@@ -74,7 +84,7 @@ function Home() {
                  'Previous events'}
               </p>
             </div>
-
+  
             {/* Tabs Navigation */}
             <div className="mb-6 sm:mb-8">
               <nav className="flex justify-center space-x-2 sm:space-x-8">
@@ -101,7 +111,7 @@ function Home() {
                 ))}
               </nav>
             </div>
-
+  
             {/* Events Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {isLoading ? (
@@ -153,7 +163,7 @@ function Home() {
                 </div>
               )}
             </div>
-
+  
             {/* Load More Button */}
             {hasMore && !isLoading && (
               <div className="mt-8 text-center">
@@ -169,7 +179,7 @@ function Home() {
           </main>
         </div>
       </div>
-
+  
       {/* Quick Actions FAB */}
       <div className="fixed bottom-6 right-6 z-50" ref={plusButtonRef}>
         <button
@@ -194,41 +204,49 @@ function Home() {
             />
           </svg>
         </button>
-
-        {/* Quick Actions Menu */}
+  
+        {/* Quick Actions Menu - Updated styling */}
         {isPlusMenuOpen && (
           <div className="absolute bottom-full right-0 mb-4 w-56 bg-white rounded-lg shadow-2xl py-2">
             <div className="px-4 py-2 border-b border-gray-100">
               <h3 className="text-sm font-medium text-gray-700">Quick Actions</h3>
             </div>
-            {['certificates', 'help'].map(item => (
+            <div>
               <Link
-                key={item}
-                to={`/${item}`}
-                className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 transition-all duration-200"
+                to="/certificates"
+                className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-green-50 transition-all duration-200"
               >
-                <span className="w-8 h-8 mr-3 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
-                  {item === 'certificates' ? (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  )}
+                <span className="w-8 h-8 mr-3 flex items-center justify-center rounded-full bg-green-500 text-white">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </span>
                 <div>
-                  <span className="block font-medium capitalize">{item}</span>
-                  <span className="block text-xs text-gray-500 mt-0.5">
-                    {item === 'certificates' ? 'View your certificates' : 'Get support'}
-                  </span>
+                  <span className="block font-medium capitalize">Certificates</span>
+                  <span className="block text-xs text-gray-500 mt-0.5">View your certificates</span>
                 </div>
               </Link>
-            ))}
+              <Link
+                to="/help"
+                className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-green-50 transition-all duration-200 w-full text-left"
+              >
+                <span className="w-8 h-8 mr-3 flex items-center justify-center rounded-full bg-green-500 text-white">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </span>
+                <div>
+                  <span className="block font-medium capitalize">Help</span>
+                  <span className="block text-xs text-gray-500 mt-0.5">Get support</span>
+                </div>
+              </Link>
+            </div>
           </div>
         )}
       </div>
+  
+      {/* Help Menu */}
+      <HelpMenu isOpen={isHelpMenuOpen} onClose={handleHelpClose} />
     </div>
   );
 }
