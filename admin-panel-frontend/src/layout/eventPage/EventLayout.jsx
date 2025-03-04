@@ -6,6 +6,8 @@ import OverviewTab from "../../components/eventPage/OverviewTab";
 import TimelineTab from "../../components/eventPage/TimelineTab";
 import ResourcesTab from "../../components/eventPage/ResourcesTab";
 import FeedbackTab from "../../components/eventPage/FeedbackTab";
+import Analytics from "../../components/eventPage/Analytics";
+import AttendanceTab from "../../components/eventPage/Attendance";
 
 export default function EventLayout({ eventData, setEventData, activeTab, setActiveTab }) {
     return (
@@ -71,13 +73,26 @@ export default function EventLayout({ eventData, setEventData, activeTab, setAct
                 {activeTab === "timeline" && (
                   <TimelineTab eventData={eventData} />
                 )}
-                
-                { activeTab === "resources" && (
-                    <ResourcesTab eventData={eventData} />
+
+                {activeTab === "resources" && (
+                  <ResourcesTab eventData={eventData} />
                 )}
 
-                { activeTab === "feedback" && (
-                  <FeedbackTab eventData={eventData} onUpdate={(updatedEvent)=>{setEventData(updatedEvent)}} />
+                {activeTab === "feedback" && (
+                  <FeedbackTab
+                    eventData={eventData}
+                    onUpdate={(updatedEvent) => {
+                      setEventData(updatedEvent);
+                    }}
+                  />
+                )}
+
+                {activeTab === "analytics" && (
+                  <Analytics eventData={eventData} />
+                )}
+
+                {activeTab === "attendance" && (
+                  <AttendanceTab eventData={eventData} />
                 )}
               </div>
             </div>

@@ -9,6 +9,9 @@ const { getEventById } = require("../events/getEventById");
 const { updateEvent } = require("../events/updateEvents");
 const { verifyToken } = require('../auth/verify');
 const { createFeedback } = require('../events/createFeedback');
+const { getRegisteredUsers } = require('../events/getRegisteredUsers');
+const { updateAttendanceMethod } = require('../events/updateAttendanceMethod');
+const { markAttendance } = require('../events/markAttendance');
 
 router.post('/create', verifyToken, createEvent);
 router.get('/get-my-events', verifyToken, getMyEvents);
@@ -42,5 +45,11 @@ router.get(
 router.put('/:eventId/feedback', verifyToken, createFeedback);
 
 router.put("/update/:eventId", verifyToken, updateEvent);
+
+router.get("/:eventId/registered-users", verifyToken, getRegisteredUsers);
+
+router.put('/:eventId/update-attendance-mode', verifyToken, updateAttendanceMethod);
+
+router.post('/:eventId/mark-attendance', verifyToken, markAttendance);
 
 module.exports = router;

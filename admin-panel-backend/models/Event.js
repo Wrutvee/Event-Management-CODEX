@@ -67,7 +67,7 @@ const EventSchema = new mongoose.Schema(
           id: { type: String, required: true },
           label: { type: String, required: true },
           required: { type: Boolean, default: false },
-          _id : false
+          _id: false,
         },
       ],
       additionalInfo: {
@@ -89,6 +89,21 @@ const EventSchema = new mongoose.Schema(
       qrCheckin: { type: Boolean, default: false },
       manualCheckin: { type: Boolean, default: false },
     },
+    attendees: [{
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      checkInTime: {
+        type: Date,
+        default: Date.now
+      },
+      checkInMethod: {
+        type: String,
+        enum: ['qr', 'manual'],
+        required: true
+      }
+    }],
     promotionLinks: {
       instagram: String,
       twitter: String,
@@ -122,6 +137,10 @@ const EventSchema = new mongoose.Schema(
         },
       ],
     },
+    registeredUsers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      }],
   },
   { timestamps: true }
 );

@@ -53,7 +53,7 @@ app.use(
     cookie: {
       key: "XSRF-TOKEN",
       httpOnly: false, // Frontend needs to read it
-      sameSite: "strict",
+      sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
     },
     value: (req) => req.headers["x-csrf-token"],
