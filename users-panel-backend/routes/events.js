@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { verifyToken } = require('../auth/verify');
 const Event = require("../models/Event");
+const User = require("../models/User"); 
 
 // Get all events (10 each category)
 router.get('/all', verifyToken, async (req, res) => {
@@ -208,6 +209,111 @@ router.get('/event/:eventId', verifyToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error fetching event details'
+    });
+  }
+});
+
+// Register for event
+router.post('/:eventId/register', verifyToken, async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const userId = req.user.id;
+    const registrationData = req.body;
+
+    // Find event
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: 'Event not found'
+      });
+    }
+
+    // Check if registration is open
+    if (!event.isRegistrationOpen()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Registration is closed'
+      });
+    }
+
+    // Check if event is full
+    if (event.isFull) {
+      return res.status(400).json({
+        success: false,
+        message: 'Event is full'
+      });
+    }
+
+    // Check if user is already registered
+    if (event.registeredUsers.includes(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Already registered for this event'
+      });
+    }
+
+    // Validate required fields
+    if (event.registration.isRequired) {
+      const missingFields = event.registration.formFields
+        .filter(field => field.required && !registrationData[field.id])
+        .map(field => field.label);
+
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Missing required fields: ${missingFields.join(', ')}`
+        });
+      }
+
+      if (event.registration.additionalInfo.required && !registrationData.additionalInfo) {
+        return res.status(400).json({
+          success: false,
+          message: 'Additional information is required'
+        });
+      }
+    }
+
+    // Register user
+    event.registeredUsers.push(userId);
+    await event.save();
+
+    // Structure registration data
+    const formattedRegistrationData = {
+      formFields: event.registration.formFields.reduce((acc, field) => {
+        acc[field.id] = {
+          question: field.label,
+          answer: registrationData[field.id] || ''
+        };
+        return acc;
+      }, {}),
+      additionalInfo: event.registration.additionalInfo.required ? {
+        question: event.registration.additionalInfo.question,
+        answer: registrationData.additionalInfo
+      } : null
+    };
+
+    // Add registration to user's profile
+    await User.findByIdAndUpdate(userId, {
+      $push: {
+        registeredEvents: {
+          eventId: event._id,
+          registrationDate: new Date(),
+          formResponses: formattedRegistrationData
+        }
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Successfully registered for the event'
+    });
+
+  } catch (error) {
+    console.error('Event registration error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error registering for event'
     });
   }
 });

@@ -209,23 +209,19 @@ export default function EventForm({
       registration: {
         ...formData.registration,
         formFields: formData.registration.formFields.map((fieldId) => {
-          // Add null check and default value
-          const fieldConfig = defaultFormFields.find(
-            (f) => f.id === fieldId
-          ) || {
-            id: fieldId,
-            label: fieldId,
-            required: false,
-          };
+          // Find the field configuration from defaultFormFields
+          const fieldConfig = defaultFormFields.find(f => f.id === fieldId);
+          if (!fieldConfig) return null;
+
+          // Return the properly structured field object
           return {
             id: fieldConfig.id,
             label: fieldConfig.label,
-            required: fieldConfig.required,
+            required: fieldConfig.required
           };
-        }),
-      },
+        }).filter(Boolean) // Remove any null values
+      }
     };
-
 
     // Submit form
     try {

@@ -67,6 +67,7 @@ const EventSchema = new mongoose.Schema(
           id: { type: String, required: true },
           label: { type: String, required: true },
           required: { type: Boolean, default: false },
+          _id : false
         },
       ],
       additionalInfo: {
