@@ -136,3 +136,11 @@ textarea {
     }
   }
 }
+
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: 1px;
+  }
+}

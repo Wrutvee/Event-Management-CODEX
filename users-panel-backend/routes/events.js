@@ -4,7 +4,7 @@ const { verifyToken } = require('../auth/verify');
 const Event = require("../models/Event");
 
 // Get all events (10 each category)
-router.get('/all', async (req, res) => {
+router.get('/all', verifyToken, async (req, res) => {
   try {
     const limit = 10;
     const currentDate = new Date();
@@ -84,7 +84,7 @@ router.get('/all', async (req, res) => {
 });
 
 // Get paginated events for specific categories
-router.get('/:category', async (req, res) => {
+router.get('/:category', verifyToken, async (req, res) => {
   try {
     const { category } = req.params;
     const page = parseInt(req.query.page) || 1;
@@ -159,6 +159,55 @@ router.get('/:category', async (req, res) => {
     res.status(500).json({
       success: false,
       message: `Error fetching ${req.params.category} events`
+    });
+  }
+});
+
+// Get event by ID
+router.get('/event/:eventId', verifyToken, async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const userId = req.user?.id; // Get user ID if authenticated
+
+    const event = await Event.findOne({ 
+      _id: eventId,
+       visibility: "public",
+      status: { $ne: "cancelled" }
+    });
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: 'Event not found'
+      });
+    }
+
+    // Check if user is registered for this event
+    const isRegistered = userId ? event.registeredUsers.includes(userId) : false;
+
+    // Check if event is full
+    const isEventFull = event.capacity.required && 
+      event.registeredUsers.length >= event.capacity.maxParticipants;
+
+    // Check if registration is open
+    const isRegistrationOpen = event.registration.isRequired ? 
+      new Date() < new Date(event.registration.deadline) : true;
+
+    res.json({
+      success: true,
+      event: {
+        ...event.toObject(),
+        isRegistered,
+        isEventFull,
+        isRegistrationOpen
+      }
+    });
+
+  } catch (error) {
+    console.error('Get event by ID error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching event details'
     });
   }
 });

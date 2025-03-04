@@ -1,122 +1,178 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import axiosInstance from '../services/axiosConfig';
 
-// Create the context
-const EventContext = createContext();
+const EventContext = createContext(null);
 
-// Custom hook to use the event context
 export const useEvents = () => {
   const context = useContext(EventContext);
   if (!context) {
-    throw new Error('useEvents must be used within an EventsProvider');
+    throw new Error('useEvents must be used within an EventProvider');
   }
   return context;
 };
 
-// Provider component
-export const EventProvider = ({ children }) => {  // Changed from EventsProvider to EventProvider
-  const [events, setEvents] = useState([]);
-  const [featuredEvents, setFeaturedEvents] = useState([]);
-  const [upcomingEvents, setUpcomingEvents] = useState([]);
-  const [pastEvents, setPastEvents] = useState([]);
-  const [loading, setLoading] = useState(false);
+export const EventProvider = ({ children }) => {
+  const [events, setEvents] = useState({
+    my: { data: [], total: 0, hasMore: false, page: 1, loading: false },
+    upcoming: { data: [], total: 0, hasMore: false, page: 1, loading: false },
+    past: { data: [], total: 0, hasMore: false, page: 1, loading: false }
+  });
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch all events
-  const fetchEvents = async () => {
+  // Fetch all events initially
+  const fetchAllEvents = useCallback(async () => {
     try {
-      setLoading(true);
+      setIsInitialLoading(true);
       setError(null);
+
+      const response = await axiosInstance.get('/events/all');
       
-      // Fetch events from admin backend
-      const response = await axiosInstance.get('http://localhost:3000/api/events/get-all-events', {
-        withCredentials: true
-      });
-
-      if (response.data.success) {
-        const allEvents = [...response.data.upcoming.events, ...response.data.past.events];
-        const now = new Date();
-
-        setEvents(allEvents);
-        // Featured events are upcoming events marked as featured
-        setFeaturedEvents(response.data.upcoming.events.filter(event => event.isFeatured));
-        setUpcomingEvents(response.data.upcoming.events);
-        setPastEvents(response.data.past.events);
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to fetch events');
       }
+
+      const { my, upcoming, past } = response.data;
+
+      setEvents({
+        my: {
+          data: my.events || [],
+          total: my.total || 0,
+          hasMore: my.hasMore || false,
+          page: 1,
+          loading: false
+        },
+        upcoming: {
+          data: upcoming.events || [],
+          total: upcoming.total || 0,
+          hasMore: upcoming.hasMore || false,
+          page: 1,
+          loading: false
+        },
+        past: {
+          data: past.events || [],
+          total: past.total || 0,
+          hasMore: past.hasMore || false,
+          page: 1,
+          loading: false
+        }
+      });
     } catch (error) {
       console.error('Error fetching events:', error);
-      setError(error.message);
-      toast.error('Failed to load events');
+      setError(error.message || 'Failed to load events');
+      toast.error(error.message || 'Failed to load events');
     } finally {
-      setLoading(false);
+      setIsInitialLoading(false);
     }
-  };
+  }, []);
 
-  // Fetch a single event by ID
-  const fetchEventById = async (eventId) => {
+  // Load more events for a specific category
+  const loadMoreEvents = async (category) => {
+    if (events[category].loading || !events[category].hasMore) return;
+
+    setEvents(prev => ({
+      ...prev,
+      [category]: { ...prev[category], loading: true }
+    }));
+
     try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await axiosInstance.get(`http://localhost:3000/api/events/${eventId}`, {
-        withCredentials: true
+      const nextPage = events[category].page + 1;
+      const response = await axiosInstance.get(`/events/${category}`, {
+        params: { page: nextPage, limit: 10 }
       });
 
-      if (response.data.success) {
-        return response.data.event;
+      if (!response.data.success) {
+        throw new Error(response.data.message || `Failed to load more ${category} events`);
       }
-      return null;
+
+      const { events: newEvents, pagination } = response.data;
+
+      setEvents(prev => ({
+        ...prev,
+        [category]: {
+          data: [...prev[category].data, ...newEvents],
+          total: pagination.totalEvents,
+          hasMore: pagination.hasMore,
+          page: nextPage,
+          loading: false
+        }
+      }));
     } catch (error) {
-      console.error('Error fetching event:', error);
-      setError(error.message);
-      toast.error('Failed to load event details');
-      return null;
-    } finally {
-      setLoading(false);
+      console.error(`Error loading more ${category} events:`, error);
+      toast.error(error.message || `Failed to load more ${category} events`);
+      setEvents(prev => ({
+        ...prev,
+        [category]: { ...prev[category], loading: false }
+      }));
     }
   };
 
-  // Register for an event
-  const registerForEvent = async (eventId) => {
+  // Get event by ID
+  const getEventById = async (eventId) => {
     try {
-      setLoading(true);
-      const response = await axiosInstance.post(`/events/${eventId}/register`);
+      const response = await axiosInstance.get(`/events/${eventId}`);
       
-      if (response.data.success) {
-        // Update the events state to reflect registration
-        setEvents(prevEvents => 
-          prevEvents.map(event => 
-            event._id === eventId ? { ...event, isRegistered: true } : event
-          )
-        );
-        toast.success('Successfully registered for the event!');
-        return true;
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to fetch event');
       }
+
+      return response.data.event;
     } catch (error) {
-      console.error('Error registering for event:', error);
-      toast.error(error.response?.data?.message || 'Failed to register for the event');
-      return false;
-    } finally {
-      setLoading(false);
+      console.error('Error fetching event:', error);
+      toast.error(error.message || 'Failed to load event details');
+      return null;
     }
   };
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-  const value = {
-    events,
-    featuredEvents,
-    upcomingEvents,
-    pastEvents,
-    loading,
-    error,
-    fetchEvents,
-    fetchEventById,
-    registerForEvent
+
+  // Register for event
+  const registerForEvent = async (eventId, registrationData) => {
+    try {
+      const response = await axiosInstance.post(`/events/${eventId}/register`, registrationData);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Registration failed');
+      }
+
+      // Update local state to reflect registration
+      setEvents(prev => ({
+        ...prev,
+        upcoming: {
+          ...prev.upcoming,
+          data: prev.upcoming.data.map(event => 
+            event._id === eventId ? { ...event, isRegistered: true } : event
+          )
+        },
+        my: {
+          ...prev.my,
+          data: [...prev.my.data, response.data.event]
+        }
+      }));
+
+      toast.success('Successfully registered for the event!');
+      return true;
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast.error(error.message || 'Failed to register for event');
+      return false;
+    }
   };
+
+  // Initial fetch
+  useEffect(() => {
+    fetchAllEvents();
+  }, [fetchAllEvents]);
+
   return (
-    <EventContext.Provider value={value}>
+    <EventContext.Provider value={{
+      events,
+      isInitialLoading,
+      error,
+      loadMoreEvents,
+      getEventById,
+      registerForEvent,
+      refreshEvents: fetchAllEvents
+    }}>
       {children}
     </EventContext.Provider>
   );
