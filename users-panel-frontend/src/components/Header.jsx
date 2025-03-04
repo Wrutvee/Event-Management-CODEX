@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import EventCalendarDropdown from './EventCalendarDropdown';
+import { Award, Calendar } from 'lucide-react'; // Added missing imports
 
 function Header() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -171,7 +172,7 @@ function Header() {
                   focus:outline-none w-10 h-10 justify-center overflow-hidden
                 `}
                   style={{
-                    background: `url('/images/740ecb78aa4c10cb0a2170ea2350c337.jpg')`,
+                    background: `url('${user?.profilePicture || "/images/740ecb78aa4c10cb0a2170ea2350c337.jpg"}')`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                   }}
@@ -184,16 +185,19 @@ function Header() {
                         <div className="h-10 w-10 rounded-full overflow-hidden border border-indigo-500">
                           <img
                             className="h-full w-full object-cover"
-                            src="/images/740ecb78aa4c10cb0a2170ea2350c337.jpg"
+                            src={user?.profilePicture || "/images/740ecb78aa4c10cb0a2170ea2350c337.jpg"}
                             alt="Profile"
+                            onError={(e) => {
+                              e.target.src = "/images/740ecb78aa4c10cb0a2170ea2350c337.jpg";
+                            }}
                           />
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-gray-800">
-                            {user?.name || "John Doe"}
+                            {user?.name || "Guest User"}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {user?.email || "john@example.com"}
+                            {user?.email || "guest@example.com"}
                           </p>
                         </div>
                       </div>

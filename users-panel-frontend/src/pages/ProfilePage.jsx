@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import Header from '../components/Header';
-import Footer from '../components/Footer';
+// Footer import removed
 import { useAuth } from '../context/AuthContext';
 import { useEvents } from '../context/EventContext';
 import axiosInstance from '../services/axiosConfig';
@@ -227,7 +227,7 @@ function ProfilePage() {
                   className="w-full h-full object-cover"
                 />
                 {isEditing && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute inset-0 bg-gray-400 bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <span className="text-white text-sm font-medium">Change Photo</span>
                   </div>
                 )}
@@ -362,8 +362,6 @@ function ProfilePage() {
           </div>
         </div>
       </main>
-      
-      <Footer />
     </div>
   );
 }

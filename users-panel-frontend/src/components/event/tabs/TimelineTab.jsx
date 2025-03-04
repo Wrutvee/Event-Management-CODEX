@@ -34,7 +34,7 @@ function TimelineTab({ event }) {
       <div className="space-y-12 sm:space-y-16">
         {/* End Date */}
         <div className="relative group">
-          <div className="absolute -left-7 sm:-left-10 p-2.5 sm:p-3 bg-gray-900 rounded-full shadow-lg shadow-indigo-100 z-10 transform transition-transform duration-300 group-hover:scale-110">
+          <div className="absolute -left-7 sm:-left-10 p-2.5 sm:p-3 bg-gray-400 rounded-full shadow-lg shadow-indigo-100 z-10 transform transition-transform duration-300 group-hover:scale-110">
             <Flag className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
           </div>
           <div className="bg-white p-4 sm:p-5 rounded-lg shadow-sm border-l-4 border-indigo-600 hover:shadow-md transition-all duration-300 transform group-hover:-translate-y-1">
@@ -65,7 +65,7 @@ function TimelineTab({ event }) {
 
         {/* Start Date */}
         <div className="relative group">
-          <div className="absolute -left-7 sm:-left-10 p-2.5 sm:p-3 bg-gray-900 rounded-full shadow-lg shadow-indigo-100 z-10 transform transition-transform duration-300 group-hover:scale-110">
+          <div className="absolute -left-7 sm:-left-10 p-2.5 sm:p-3 bg-gray-400 rounded-full shadow-lg shadow-indigo-100 z-10 transform transition-transform duration-300 group-hover:scale-110">
             <Star className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
           </div>
           <div className="bg-white p-4 sm:p-5 rounded-lg shadow-sm border-l-4 border-indigo-600 hover:shadow-md transition-all duration-300 transform group-hover:-translate-y-1">
@@ -85,7 +85,7 @@ function TimelineTab({ event }) {
         {/* Registration Deadline */}
         {event.registration.isRequired && (
           <div className="relative group">
-            <div className="absolute -left-7 sm:-left-10 p-2.5 sm:p-3 bg-gray-900 rounded-full shadow-lg shadow-indigo-100 z-10 transform transition-transform duration-300 group-hover:scale-110">
+            <div className="absolute -left-7 sm:-left-10 p-2.5 sm:p-3 bg-gray-400 rounded-full shadow-lg shadow-indigo-100 z-10 transform transition-transform duration-300 group-hover:scale-110">
               <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
             <div className="bg-white p-4 sm:p-5 rounded-lg shadow-sm border-l-4 border-indigo-600 hover:shadow-md transition-all duration-300 transform group-hover:-translate-y-1">
@@ -107,7 +107,7 @@ function TimelineTab({ event }) {
 
         {/* Event Creation */}
         <div className="relative group">
-          <div className="absolute -left-7 sm:-left-10 p-2.5 sm:p-3 bg-gray-900 rounded-full shadow-lg shadow-indigo-100 z-10 transform transition-transform duration-300 group-hover:scale-110">
+          <div className="absolute -left-7 sm:-left-10 p-2.5 sm:p-3 bg-gray-400 rounded-full shadow-lg shadow-indigo-100 z-10 transform transition-transform duration-300 group-hover:scale-110">
             <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
           </div>
           <div className="bg-white p-4 sm:p-5 rounded-lg shadow-sm border-l-4 border-indigo-600 hover:shadow-md transition-all duration-300 transform group-hover:-translate-y-1">

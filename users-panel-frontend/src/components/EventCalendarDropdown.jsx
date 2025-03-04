@@ -6,15 +6,26 @@ import { useEvents } from '../context/EventContext';
 import axiosInstance from '../services/axiosConfig';
 import 'react-calendar/dist/Calendar.css';
 
-function EventCalendarDropdown({ isOpen, onClose }) {
+function EventCalendarDropdown({ isOpen, onClose, isMobile }) {
   const [eventDates, setEventDates] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
   const [eventsForDate, setEventsForDate] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const calendarRef = useRef(null);
   const navigate = useNavigate();
   const { events } = useEvents();
 
+  // Track window resize for responsiveness
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
   // Extract event dates from events context
   useEffect(() => {
     const dates = {};
@@ -45,21 +56,17 @@ function EventCalendarDropdown({ isOpen, onClose }) {
       });
     }
     
-    // Process my events
-    if (events.my && events.my.data) {
-      events.my.data.forEach(event => {
-        if (event.dateTime && event.dateTime.start) {
-          const dateKey = format(new Date(event.dateTime.start), 'yyyy-MM-dd');
-          if (!dates[dateKey]) {
-            dates[dateKey] = [];
-          }
-          dates[dateKey].push(event);
-        }
-      });
-    }
+    // "My events" section removed as requested
     
     setEventDates(dates);
   }, [events]);
+  
+  // Calculate calendar width based on screen size
+  const getCalendarWidth = () => {
+    if (windowWidth < 400) return '280px';
+    if (windowWidth < 640) return '320px';
+    return '340px';
+  };
 
   // Handle date click
   const handleDateClick = (date) => {
@@ -121,37 +128,43 @@ function EventCalendarDropdown({ isOpen, onClose }) {
       
       <div 
         ref={calendarRef}
-        className={`absolute right-0 mt-2 bg-white rounded-lg shadow-xl z-50 transition-all duration-300 transform origin-top-right ${
-          isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0 pointer-events-none'
-        }`}
-        style={{ width: '340px' }}
+        className={`${isMobile ? 'fixed inset-x-4 top-20 bottom-auto' : 'absolute right-0 mt-2'} 
+          bg-white rounded-lg shadow-xl z-50 transition-all duration-300 transform 
+          ${isMobile ? 'origin-top' : 'origin-top-right'} 
+          ${isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0 pointer-events-none'}`}
+        style={{ 
+          width: getCalendarWidth(),
+          maxWidth: '95vw',
+          maxHeight: isMobile ? '80vh' : 'auto',
+          overflow: 'auto'
+        }}
       >
-        <div className="p-4 border-b border-gray-100">
+        <div className="p-3 sm:p-4 border-b border-gray-100">
           <h3 className="text-sm font-medium text-gray-900">Event Calendar</h3>
         </div>
         
-        <div className="p-4">
+        <div className="p-2 sm:p-4">
           <Calendar 
             onChange={handleDateClick}
             value={selectedDate || new Date()}
             tileContent={tileContent}
-            className="border-0"
+            className="border-0 w-full text-sm"
           />
         </div>
         
         {selectedDate && eventsForDate.length > 0 && (
-          <div className="p-4 border-t border-gray-100 max-h-60 overflow-y-auto">
-            <h4 className="text-sm font-medium text-gray-900 mb-2">
+          <div className="p-3 sm:p-4 border-t border-gray-100 max-h-48 sm:max-h-60 overflow-y-auto">
+            <h4 className="text-xs sm:text-sm font-medium text-gray-900 mb-2">
               Events on {format(selectedDate, 'MMMM d, yyyy')}
             </h4>
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {eventsForDate.map(event => (
                 <div 
                   key={event._id} 
-                  className="p-3 bg-gray-50 rounded-md hover:bg-indigo-50 cursor-pointer transition-colors"
+                  className="p-2 sm:p-3 bg-gray-50 rounded-md hover:bg-indigo-50 cursor-pointer transition-colors"
                   onClick={() => handleEventClick(event._id)}
                 >
-                  <h5 className="text-sm font-medium text-gray-900">{event.title}</h5>
+                  <h5 className="text-xs sm:text-sm font-medium text-gray-900">{event.title}</h5>
                   <p className="text-xs text-gray-500 mt-1">
                     {formatTime(event.dateTime.start)} - {formatTime(event.dateTime.end)}
                   </p>
@@ -167,8 +180,8 @@ function EventCalendarDropdown({ isOpen, onClose }) {
         )}
         
         {selectedDate && eventsForDate.length === 0 && (
-          <div className="p-4 border-t border-gray-100">
-            <p className="text-sm text-gray-500 text-center">
+          <div className="p-3 sm:p-4 border-t border-gray-100">
+            <p className="text-xs sm:text-sm text-gray-500 text-center">
               No events on {format(selectedDate, 'MMMM d, yyyy')}
             </p>
           </div>
