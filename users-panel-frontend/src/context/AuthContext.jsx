@@ -12,7 +12,6 @@ export const AuthProvider = ({ children }) => {
   const location = useLocation();
 
   useEffect(() => {
-    // Don't check auth status on login and signup pages
     if (location.pathname !== '/login' && location.pathname !== '/signup') {
       checkAuthStatus();
     } else {
@@ -22,16 +21,35 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await axiosInstance.get('/auth/verify');
-      if (response.data.success) {
-        setUser(response.data.user);
+      // First try user panel backend
+      const userResponse = await axiosInstance.get('/auth/verify');
+      if (userResponse.data.success) {
+        const userData = {
+          ...userResponse.data.user,
+          role: 'user',
+          registeredEvents: userResponse.data.user.registeredEvents || []
+        };
+        setUser(userData);
       }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      setUser(null);
-      // Only redirect to login if not already on login page
-      if (location.pathname !== '/login') {
-        navigate('/login');
+    } catch (userError) {
+      try {
+        // If user verification fails, try admin panel backend
+        const adminResponse = await axiosInstance.get('http://localhost:3000/api/auth/verify', {
+          withCredentials: true
+        });
+        if (adminResponse.data.success) {
+          const adminData = {
+            ...adminResponse.data.user,
+            role: 'admin'
+          };
+          setUser(adminData);
+        }
+      } catch (adminError) {
+        console.error('Auth check failed:', adminError);
+        setUser(null);
+        if (location.pathname !== '/login') {
+          navigate('/login');
+        }
       }
     } finally {
       setIsLoading(false);
@@ -40,28 +58,61 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password, rememberMe = false) => {
     try {
-      const response = await axiosInstance.post('/auth/signin', {
+      // Try user login first
+      const userLoginResponse = await axiosInstance.post('/auth/signin', {
         email,
         password,
         rememberMe
       });
 
-      if (response.data.success) {
-        setUser(response.data.user);
+      if (userLoginResponse.data.success) {
+        const userData = {
+          ...userLoginResponse.data.user,
+          role: 'user'
+        };
+        setUser(userData);
         toast.success('Successfully logged in!');
         const redirect = location.state?.from?.pathname || '/home';
         navigate(redirect, { replace: true });
+        return userLoginResponse.data;
       }
-      return response.data;
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Login failed');
-      throw error;
+    } catch (userError) {
+      try {
+        // If user login fails, try admin login
+        const adminLoginResponse = await axiosInstance.post('http://localhost:3000/api/auth/signin', {
+          email,
+          password,
+          rememberMe
+        }, {
+          withCredentials: true
+        });
+
+        if (adminLoginResponse.data.success) {
+          const adminData = {
+            ...adminLoginResponse.data.user,
+            role: 'admin'
+          };
+          setUser(adminData);
+          toast.success('Successfully logged in as admin!');
+          navigate('/admin/dashboard', { replace: true });
+          return adminLoginResponse.data;
+        }
+      } catch (adminError) {
+        toast.error(adminError.response?.data?.message || 'Login failed');
+        throw adminError;
+      }
     }
   };
 
   const logout = async () => {
     try {
-      await axiosInstance.post('/auth/logout');
+      if (user?.role === 'admin') {
+        await axiosInstance.post('http://localhost:3000/api/auth/logout', {}, {
+          withCredentials: true
+        });
+      } else {
+        await axiosInstance.post('/auth/logout');
+      }
       setUser(null);
       navigate('/login', { replace: true });
       toast.success('Successfully logged out');
