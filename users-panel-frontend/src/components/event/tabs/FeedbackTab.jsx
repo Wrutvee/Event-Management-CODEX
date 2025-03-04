@@ -97,13 +97,13 @@ function FeedbackTab({ event, isRegistered }) {
       );
 
       if (!response.data.success) {
-        throw new Error(response.data.message);
+        throw new Error(response.message);
       }
 
       setFeedbackSubmitted(true);
       toast.success("Feedback submitted successfully!");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to submit feedback");
+      toast.error(error?.message || "Failed to submit feedback");
     } finally {
       setSubmitting(false);
     }

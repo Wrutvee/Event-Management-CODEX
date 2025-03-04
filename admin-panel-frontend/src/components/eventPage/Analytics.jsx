@@ -3,6 +3,8 @@ import { BarChart3, ChevronDown, Users, Download } from 'lucide-react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { CSVLink } from 'react-csv';
+import { BarChart2 } from 'lucide-react';
+import { Bar } from 'react-chartjs-2';
 
 // Register ChartJS components
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -12,6 +14,9 @@ export default function Analytics({ eventData }) {
   const [registeredUsers, setRegisteredUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [feedbackStats, setFeedbackStats] = useState(null);
+  const [loadingFeedback, setLoadingFeedback] = useState(false);
+  const [feedbackError, setFeedbackError] = useState(null);
 
   const toggleSection = (categoryId) => {
     setOpenSections(prev => 
@@ -76,6 +81,30 @@ export default function Analytics({ eventData }) {
       setError(err.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchFeedbackStats = async () => {
+    try {
+      setLoadingFeedback(true);
+      setFeedbackError(null);
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_API_URL}/events/${eventData._id}/feedback-stats`,
+        {
+          credentials: 'include'
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch feedback stats');
+      }
+
+      const data = await response.json();
+      setFeedbackStats(data.stats);
+    } catch (err) {
+      setFeedbackError(err.message);
+    } finally {
+      setLoadingFeedback(false);
     }
   };
 
@@ -340,6 +369,129 @@ export default function Analytics({ eventData }) {
           </div>
         )}
       </div>
+
+      {/* Feedback Analytics Section */}
+      {eventData.feedback?.isEnabled && (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="flex items-center justify-between p-4 border-b">
+            <div className="flex items-center gap-2">
+              <BarChart2 className="w-5 h-5 text-purple-600" />
+              <h2 className="text-lg font-semibold text-gray-900">Feedback Analytics</h2>
+            </div>
+            <button
+              onClick={() => toggleSection('feedback')}
+              className="p-2 hover:bg-gray-50 rounded-full"
+            >
+              <ChevronDown 
+                className={`w-5 h-5 text-gray-500 transition-transform ${
+                  openSections.includes('feedback') ? 'rotate-180' : ''
+                }`} 
+              />
+            </button>
+          </div>
+
+          {openSections.includes('feedback') && (
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">Feedback Overview</h3>
+                  <p className="text-sm text-gray-500">Analysis of participant feedback</p>
+                </div>
+                <button
+                  onClick={fetchFeedbackStats}
+                  disabled={loadingFeedback}
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
+                >
+                  {loadingFeedback ? <div className='dots-loader' /> : 'Refresh Stats'}
+                </button>
+              </div>
+
+              {feedbackError && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-md">
+                  {feedbackError}
+                </div>
+              )}
+
+              {feedbackStats && (
+                <div className="space-y-8">
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <p className="text-sm font-medium text-purple-900">Total Responses</p>
+                    <p className="mt-1 text-2xl font-semibold text-purple-600">
+                      {feedbackStats.totalResponses}
+                    </p>
+                    <p className="text-sm text-purple-700">
+                      {((feedbackStats.totalResponses / totalRegistered) * 100).toFixed(1)}% Response Rate
+                    </p>
+                  </div>
+
+                  <div className="grid gap-6">
+                    {Object.values(feedbackStats.questions).map((question, index) => (
+                      <div key={index} className="bg-white p-6 rounded-lg border border-gray-200">
+                        <h4 className="font-medium text-gray-900 mb-4">{question.text}</h4>
+                        
+                        {(question.type === 'star' || question.type === 'slider') && (
+                          <div className="space-y-2">
+                            <div className="flex items-end gap-2">
+                              <div className="text-2xl font-semibold text-gray-900">
+                                {question.avgRating.toFixed(1)}
+                              </div>
+                              <div className="text-sm text-gray-500 mb-1">
+                                avg rating
+                              </div>
+                            </div>
+                            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-purple-500 rounded-full"
+                                style={{ 
+                                  width: `${(question.avgRating / (question.type === 'star' ? 5 : 10)) * 100}%` 
+                                }}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {question.type === 'choice' && (
+                          <div className="space-y-3">
+                            {question.options.map((opt, idx) => (
+                              <div key={idx} className="space-y-1">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-700">{opt.option}</span>
+                                  <span className="text-gray-500">
+                                    {opt.count} ({opt.percentage.toFixed(1)}%)
+                                  </span>
+                                </div>
+                                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-purple-500 rounded-full"
+                                    style={{ width: `${opt.percentage}%` }}
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {question.type === 'text' && (
+                          <div className="space-y-2">
+                            <p className="text-sm text-gray-500">{question.totalResponses} responses</p>
+                            <div className="max-h-40 overflow-y-auto space-y-2">
+                              {question.responses.map((response, idx) => (
+                                <div key={idx} className="p-2 bg-gray-50 rounded text-sm text-gray-700">
+                                  {response}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

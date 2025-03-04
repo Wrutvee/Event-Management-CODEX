@@ -27,7 +27,8 @@ router.get('/verify', verifyToken, async (req, res) => {
       user: {
         id: user._id.toString(), // Explicitly convert to string
         name: user.name,
-        email: user.email
+        email: user.email,
+        registeredEvents: user.registeredEvents
       }
     });
   } catch (error) {
