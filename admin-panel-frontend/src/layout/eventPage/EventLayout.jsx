@@ -8,6 +8,7 @@ import ResourcesTab from "../../components/eventPage/ResourcesTab";
 import FeedbackTab from "../../components/eventPage/FeedbackTab";
 import Analytics from "../../components/eventPage/Analytics";
 import AttendanceTab from "../../components/eventPage/Attendance";
+import Certificate from "../../components/eventPage/CertificateTab";
 
 export default function EventLayout({ eventData, setEventData, activeTab, setActiveTab }) {
     return (
@@ -93,6 +94,10 @@ export default function EventLayout({ eventData, setEventData, activeTab, setAct
 
                 {activeTab === "attendance" && (
                   <AttendanceTab eventData={eventData} />
+                )}
+
+                {activeTab === "certificates" && (
+                  <Certificate eventData={eventData} />
                 )}
               </div>
             </div>

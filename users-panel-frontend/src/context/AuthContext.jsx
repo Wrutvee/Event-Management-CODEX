@@ -24,10 +24,10 @@ export const AuthProvider = ({ children }) => {
       // First try user panel backend
       const userResponse = await axiosInstance.get('/auth/verify');
       if (userResponse.data.success) {
+
         const userData = {
           ...userResponse.data.user,
-          role: 'user',
-          registeredEvents: userResponse.data.user.registeredEvents || []
+          role: 'user'
         };
         setUser(userData);
       }

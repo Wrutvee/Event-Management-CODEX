@@ -12,6 +12,8 @@ const { createFeedback } = require('../events/createFeedback');
 const { getRegisteredUsers } = require('../events/getRegisteredUsers');
 const { updateAttendanceMethod } = require('../events/updateAttendanceMethod');
 const { markAttendance } = require('../events/markAttendance');
+const { getFeedbackStats } = require('../events/getFeedbackStats');
+const { generateCertificates } = require('../events/generateCertificates');
 
 router.post('/create', verifyToken, createEvent);
 router.get('/get-my-events', verifyToken, getMyEvents);
@@ -51,5 +53,9 @@ router.get("/:eventId/registered-users", verifyToken, getRegisteredUsers);
 router.put('/:eventId/update-attendance-mode', verifyToken, updateAttendanceMethod);
 
 router.post('/:eventId/mark-attendance', verifyToken, markAttendance);
+
+router.get('/:eventId/feedback-stats', verifyToken, getFeedbackStats);
+
+router.post('/:eventId/generate-certificates', verifyToken, generateCertificates);
 
 module.exports = router;

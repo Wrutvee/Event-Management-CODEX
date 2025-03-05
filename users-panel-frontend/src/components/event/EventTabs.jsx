@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Info, FileText, Users, CheckSquare, CheckCircle, MessageSquare,Clock } from 'lucide-react';
+import { Info, FileText, Users, CheckSquare, CheckCircle, MessageSquare,Clock, NotebookIcon } from 'lucide-react';
 import OverviewTab from './tabs/OverviewTab';
 import ResourcesTab from './tabs/ResourcesTab';
 import TeamTab from './tabs/TeamTab';
@@ -7,6 +7,7 @@ import TasksTab from './tabs/TasksTab';
 import AttendanceTab from './tabs/AttendanceTab';
 import FeedbackTab from './tabs/FeedbackTab';
 import TimelineTab from "./tabs/TimelineTab";
+import CertificateTab from './tabs/CertificateTab'; 
 
 function EventTabs({ event, isRegistered }) {
   const [activeTab, setActiveTab] = useState('overview');
@@ -18,6 +19,7 @@ function EventTabs({ event, isRegistered }) {
     { id: "team", label: "Team", icon: Users },
     { id: "tasks", label: "Tasks", icon: CheckSquare },
     { id: "attendance", label: "Attendance", icon: CheckCircle },
+    { id: "certificate", label: "Certificate", icon: NotebookIcon },
     { id: "feedback", label: "Feedback", icon: MessageSquare },
   ];
 
@@ -37,6 +39,8 @@ function EventTabs({ event, isRegistered }) {
         return <AttendanceTab event={event} isRegistered={isRegistered} />;
       case 'feedback':
         return <FeedbackTab event={event} isRegistered={isRegistered} />;
+      case 'certificate':
+        return <CertificateTab event={event._id} isRegistered={isRegistered} />;
       default:
         return <OverviewTab event={event} />;
     }
