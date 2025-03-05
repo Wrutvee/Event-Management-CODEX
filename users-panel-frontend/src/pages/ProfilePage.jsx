@@ -10,7 +10,7 @@ import axiosInstance from '../services/axiosConfig';
 // import defaultAvatar from '../assets/default-avatar.png';
 
 function ProfilePage() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, logout } = useAuth(); // Correctly destructure logout here
   const { events } = useEvents();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -169,17 +169,32 @@ function ProfilePage() {
       setIsLoading(false);
     }
   };
-
-  // Navigate to My Events page
+  // Add this function to your ProfilePage component
   const handleMyEventsClick = () => {
-    navigate('/my-events');
+    // Navigate to home page with tab parameter
+    navigate('/?tab=my');
+    // Dispatch an event to ensure the tab is selected even if already on home page
+    document.dispatchEvent(new CustomEvent('switchToMyEvents'));
   };
-
+  // Then in your JSX where the My Events button is located:
+  <button 
+    onClick={handleMyEventsClick}
+    className="flex items-center space-x-2 text-indigo-600 hover:text-indigo-800"
+  >
+    <span>My Events</span>
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+    </svg>
+  </button>
   // Navigate to Certificates page
   const handleCertificatesClick = () => {
     navigate('/certificates');
   };
-
+  // Add this function to handle sign out
+  const handleSignOut = () => {
+    logout(); // Use the logout function from AuthContext
+    // The redirect to login page should be handled in the logout function
+  };
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
@@ -346,10 +361,10 @@ function ProfilePage() {
               </div>
               <div className="flex space-x-4">
                 <button
-                  onClick={handleMyEventsClick}
-                  className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 transition-colors"
+                  onClick={handleSignOut}
+                  className="px-4 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
                 >
-                  My Events
+                  Sign Out
                 </button>
                 <button
                   onClick={handleCertificatesClick}

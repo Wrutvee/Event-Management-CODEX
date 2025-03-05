@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useEvents } from '../context/EventContext';
 import Header from '../components/Header';
 import EventCard from '../components/EventCard';
@@ -8,10 +8,24 @@ import HelpMenu from '../components/HelpMenu'; // Import HelpMenu component
 import PlusMenu from '../components/PlusMenu'; // Import PlusMenu component
 
 function Home() {
-  const [activeTab, setActiveTab] = useState('upcoming');
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const tabParam = queryParams.get('tab');
+  
+  // Initialize with 'my' tab if specified in URL, otherwise 'upcoming'
+  const [activeTab, setActiveTab] = useState(tabParam === 'my' ? 'my' : 'upcoming');
   const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
   const [isHelpMenuOpen, setIsHelpMenuOpen] = useState(false); // Add state for help menu
   const plusButtonRef = useRef(null);
+  
+  // Update tab when URL changes
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const tabParam = queryParams.get('tab');
+    if (tabParam === 'my') {
+      setActiveTab('my');
+    }
+  }, [location.search]);
   
   // Get events context
   const { 
@@ -36,7 +50,30 @@ function Home() {
     }
   };
   
-  // Handle opening help menu
+  // Listen for custom event to open help menu
+  useEffect(() => {
+    const openHelpMenuHandler = () => {
+      setIsHelpMenuOpen(true);
+    };
+    
+    document.addEventListener('openHelpMenu', openHelpMenuHandler);
+    return () => {
+      document.removeEventListener('openHelpMenu', openHelpMenuHandler);
+    };
+  }, []);
+  
+  // Listen for custom event to switch to My Events tab
+  useEffect(() => {
+    const switchToMyEventsHandler = () => {
+      setActiveTab('my');
+    };
+    
+    document.addEventListener('switchToMyEvents', switchToMyEventsHandler);
+    return () => {
+      document.removeEventListener('switchToMyEvents', switchToMyEventsHandler);
+    };
+  }, []);
+  
   const handleHelpClick = () => {
     setIsHelpMenuOpen(true);
     setIsPlusMenuOpen(false); // Close plus menu when help opens
@@ -54,6 +91,9 @@ function Home() {
         setIsPlusMenuOpen(false);
       }
     }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
@@ -227,7 +267,12 @@ function Home() {
                 </div>
               </Link>
               <Link
-                to="/help"
+                to="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsHelpMenuOpen(true);
+                  setIsPlusMenuOpen(false);
+                }}
                 className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-green-50 transition-all duration-200 w-full text-left"
               >
                 <span className="w-8 h-8 mr-3 flex items-center justify-center rounded-full bg-green-500 text-white">

@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import EventCalendarDropdown from './EventCalendarDropdown';
-import { Award, Calendar } from 'lucide-react'; // Added missing imports
+import { Award, Calendar } from 'lucide-react';
+import SearchBar from './SearchBar';
 
 function Header() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -16,21 +17,24 @@ function Header() {
   const eventHubRef = useRef(null);
   const calendarRef = useRef(null);
   const navigate = useNavigate();
-
+  const location = useLocation(); // Add this to get current location
+  
+  // Check if current page is home page
+  const isHomePage = location.pathname === '/' || location.pathname === '/home';
   const handleEventHubClick = () => {
     navigate('/super-admin/announcements');
   };
-
+  
   // Add resize listener
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-
+  
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
+  
   // Handle notification click based on device
   const handleNotificationClick = () => {
     if (isMobile) {
@@ -96,7 +100,17 @@ function Header() {
                 </span>
               </Link>
             </div>
-  {/* Right section */}
+  
+            {/* Show SearchBar only on home page */}
+            {isHomePage && (
+              <div className="hidden md:flex flex-1 justify-center items-center px-6">
+                <div className="w-full max-w-md mx-auto">
+                  <SearchBar />
+                </div>
+              </div>
+            )}
+  
+            {/* Right section */}
             <div className="flex items-center space-x-4">
               {/* Calendar Button removed from here */}
   
@@ -274,6 +288,14 @@ function Header() {
             </div>
           </div>
         </div>
+        {/* Add mobile search bar with centering - only on home page */}
+        {isHomePage && (
+          <div className="md:hidden py-3 px-4 border-t border-gray-100 flex justify-center">
+            <div className="w-full max-w-md mx-auto">
+              <SearchBar />
+            </div>
+          </div>
+        )}
       </header>
       {/* Calendar Dropdown - Updated for better mobile responsiveness */}
       {isCalendarOpen && (
