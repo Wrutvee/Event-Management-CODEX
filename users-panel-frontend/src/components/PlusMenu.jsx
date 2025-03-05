@@ -1,5 +1,5 @@
 import React from 'react';
-import { HelpCircle, Calendar, Award, Settings, Plus } from 'lucide-react';
+import { HelpCircle, Calendar, Award, Settings } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
@@ -9,6 +9,7 @@ function PlusMenu({ isOpen, onClose }) {
   const handleNavigation = (path) => {
     try {
       navigate(path);
+      onClose(); // Close the menu after navigation
     } catch (error) {
       toast.error('Navigation failed. Please try again.');
     }
@@ -16,13 +17,6 @@ function PlusMenu({ isOpen, onClose }) {
   
   // Create separate arrays for link items and button items
   const linkItems = [
-    {
-      icon: <HelpCircle className="h-5 w-5" />,
-      label: 'Help & Support',
-      to: '/help',
-      color: 'bg-green-500 hover:bg-green-600', // Match Certificates style
-      ariaLabel: 'Open help and support'
-    },
     {
       icon: <Award className="h-5 w-5" />,
       label: 'Certificates',
@@ -34,6 +28,17 @@ function PlusMenu({ isOpen, onClose }) {
   
   const menuItems = [
     {
+      icon: <HelpCircle className="h-5 w-5" />,
+      label: 'Help & Support',
+      onClick: () => {
+        // This will be handled by the parent component
+        document.dispatchEvent(new CustomEvent('openHelpMenu'));
+        onClose();
+      },
+      color: 'bg-green-500 hover:bg-green-600',
+      ariaLabel: 'Open help and support'
+    },
+    {
       icon: <Calendar className="h-5 w-5" />,
       label: 'My Calendar',
       onClick: () => handleNavigation('/calendar'),
@@ -44,7 +49,7 @@ function PlusMenu({ isOpen, onClose }) {
       icon: <Settings className="h-5 w-5" />,
       label: 'Settings',
       onClick: () => handleNavigation('/settings'),
-      color: 'bg-gray-500 hover:bg-gray-600', // Changed from dark gray to lighter gray
+      color: 'bg-gray-500 hover:bg-gray-600',
       ariaLabel: 'Open settings'
     }
   ];

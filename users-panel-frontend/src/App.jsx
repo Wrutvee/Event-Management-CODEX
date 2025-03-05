@@ -3,7 +3,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingScreen from './components/LoadingScreen';
-import HelpPage from './pages/HelpPage';
+// Remove HelpPage import since we're integrating it into Home
+// import HelpPage from './pages/HelpPage';
+
 
 // Lazy load pages for better performance
 const Home = lazy(() => import('./pages/Home'));
@@ -13,9 +15,7 @@ const EventPage = lazy(() => import('./pages/EventPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const CertificatesPage = lazy(() => import('./pages/CertificatesPage'));
-
-// Remove or rename the duplicate Home import
-// const Home = lazy(() => import('./pages/Home')); // This is the duplicate line causing the error
+const SearchResults = lazy(() => import('./pages/SearchResults'));
 
 function App() {
   return (
@@ -52,6 +52,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/events/:eventId" element={<EventPage />} />
+          <Route path="/search" element={<SearchResults />} />
           
           {/* Protected routes */}
           <Route path="/profile" element={
@@ -65,7 +66,9 @@ function App() {
               <CertificatesPage />
             </ProtectedRoute>
           } />
-          <Route path="/help" element={<HelpPage />} />
+          
+          {/* Remove the separate help page route */}
+          {/* <Route path="/help" element={<HelpPage />} /> */}
           {/* 404 route */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
