@@ -3,8 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingScreen from './components/LoadingScreen';
-// Remove HelpPage import since we're integrating it into Home
-// import HelpPage from './pages/HelpPage';
+import Developers from './pages/Developers';
 
 
 // Lazy load pages for better performance
@@ -70,6 +69,7 @@ function App() {
           {/* Remove the separate help page route */}
           {/* <Route path="/help" element={<HelpPage />} /> */}
           {/* 404 route */}
+          <Route path="/developers" element={<Developers />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
