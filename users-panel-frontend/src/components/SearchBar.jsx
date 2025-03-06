@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Search, X, Clock, TrendingUp, Calendar } from 'lucide-react';
+import { Search, X, Clock, Calendar } from 'lucide-react'; // Remove TrendingUp
 
 function SearchBar() {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [recentSearches, setRecentSearches] = useState([]);
-  const [trendingSearches, setTrendingSearches] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -21,10 +20,7 @@ function SearchBar() {
     if (savedSearches) {
       setRecentSearches(JSON.parse(savedSearches).slice(0, 5));
     }
-    
-    // Fetch trending searches
-    fetchTrendingSearches();
-  }, []);
+  }, []); // Remove fetchTrendingSearches
 
   // Handle clicks outside the search component
   useEffect(() => {
@@ -37,23 +33,6 @@ function SearchBar() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-  // Fetch trending searches from the API
-  const fetchTrendingSearches = async () => {
-    try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/events/trending-searches`);
-      setTrendingSearches(response.data.trends || []);
-    } catch (error) {
-      console.error('Error fetching trending searches:', error);
-      // Fallback to default trending searches if API fails
-      setTrendingSearches([
-        { term: 'Tech Conference', count: 120 },
-        { term: 'Music Festival', count: 98 },
-        { term: 'Coding Workshop', count: 75 },
-        { term: 'Networking Event', count: 62 },
-        { term: 'Career Fair', count: 54 }
-      ]);
-    }
-  };
   // Debounce function to limit API calls
   const debounce = (func, delay) => {
     let timeoutId;
@@ -135,13 +114,6 @@ function SearchBar() {
     navigate(`/search?query=${encodeURIComponent(searchTerm)}`);
     setIsFocused(false);
   };
-  // Handle trending search click
-  const handleTrendingSearchClick = (searchTerm) => {
-    setQuery(searchTerm);
-    saveToRecentSearches(searchTerm);
-    navigate(`/search?query=${encodeURIComponent(searchTerm)}`);
-    setIsFocused(false);
-  };
   // Clear search input
   const clearSearch = () => {
     setQuery('');
@@ -149,10 +121,8 @@ function SearchBar() {
   };
   // Handle keyboard navigation
   const handleKeyDown = (e) => {
-    // Calculate total items (suggestions + recent searches + trending searches)
-    const totalItems = suggestions.length + 
-                      (recentSearches.length > 0 ? recentSearches.length : 0) + 
-                      (trendingSearches.length > 0 ? trendingSearches.length : 0);
+    // Calculate total items (suggestions + recent searches)
+    const totalItems = suggestions.length + recentSearches.length;
     
     if (totalItems === 0) return;
     
@@ -169,17 +139,14 @@ function SearchBar() {
       if (selectedIndex < suggestions.length) {
         // It's a suggestion
         handleSuggestionClick(suggestions[selectedIndex]._id);
-      } else if (selectedIndex < suggestions.length + recentSearches.length) {
+      } else {
         // It's a recent search
         const recentIndex = selectedIndex - suggestions.length;
         handleRecentSearchClick(recentSearches[recentIndex]);
-      } else {
-        // It's a trending search
-        const trendingIndex = selectedIndex - suggestions.length - recentSearches.length;
-        handleTrendingSearchClick(trendingSearches[trendingIndex].text);
       }
     }
   };
+
   return (
     <div className="relative w-full max-w-2xl" ref={searchRef}>
       <form onSubmit={handleSubmit} className="relative">
@@ -214,7 +181,7 @@ function SearchBar() {
         </div>
       </form>
       {/* Dropdown for suggestions */}
-      {isFocused && (suggestions.length > 0 || recentSearches.length > 0 || trendingSearches.length > 0) && (
+      {isFocused && (suggestions.length > 0 || recentSearches.length > 0) && (
         <div className="absolute z-50 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
           {/* Event suggestions */}
           {suggestions.length > 0 && (
@@ -275,30 +242,6 @@ function SearchBar() {
                     >
                       <Clock className="h-4 w-4 text-gray-400 mr-3" />
                       <span>{search}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {/* Trending searches */}
-          {trendingSearches.length > 0 && (
-            <div className="py-2 border-t border-gray-100">
-              <h3 className="px-4 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Trending
-              </h3>
-              <ul>
-                {trendingSearches.map((item, index) => (
-                  <li key={`trending-${index}`}>
-                    <button
-                      type="button"
-                      onClick={() => handleTrendingSearchClick(item.text)}
-                      className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center ${
-                        selectedIndex === suggestions.length + recentSearches.length + index ? 'bg-gray-100' : ''
-                      }`}
-                    >
-                      <TrendingUp className="h-4 w-4 text-gray-400 mr-3" />
-                      <span>{item.text}</span>
                     </button>
                   </li>
                 ))}
