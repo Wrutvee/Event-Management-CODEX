@@ -68,7 +68,7 @@ export default function MobileMenu({ isOpen }) {
           </svg>
           Events
         </Link>
-        <Link
+        {/* <Link
           to="/analytics"
           className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
             isActive("/analytics")
@@ -117,7 +117,7 @@ export default function MobileMenu({ isOpen }) {
             />
           </svg>
           Resources
-        </Link>
+        </Link> */}
 
         {/* Host New Event Button */}
         <button

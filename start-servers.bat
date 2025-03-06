@@ -12,16 +12,16 @@ echo Starting all servers...
 echo.
 
 :: Start Admin Panel Backend (Port 5000)
-start "Admin Backend" cmd /k "cd admin-panel-backend && npm start"
+start "Admin Backend" cmd /k "cd admin-panel-backend && npm i && npm start"
 
 :: Start Admin Panel Frontend (Port 5173)
-start "Admin Frontend" cmd /k "cd admin-panel-frontend && npm run dev"
+start "Admin Frontend" cmd /k "cd admin-panel-frontend && npm i && npm run dev"
 
 :: Start Users Panel Backend (Port 5001)
-start "Users Backend" cmd /k "cd users-panel-backend && npm start"
+start "Users Backend" cmd /k "cd users-panel-backend && npm i && npm start"
 
 :: Start Users Panel Frontend (Port 5174)
-start "Users Frontend" cmd /k "cd users-panel-frontend && npm run dev"
+start "Users Frontend" cmd /k "cd users-panel-frontend && npm i && npm run dev"
 
 echo.
 echo All servers started! You can minimize this window.

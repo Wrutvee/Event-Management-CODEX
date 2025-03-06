@@ -44,7 +44,7 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation
             <div className="hidden md:flex items-center md:space-x-2 lg:space-x-4">
               <Link
                 to="/home"
@@ -121,7 +121,7 @@ export default function Navbar() {
                 </svg>
                 Resources
               </Link>
-            </div>
+            </div> */}
 
             {/* Right Section */}
             <div className="flex items-center md:space-x-2 lg:space-x-4">

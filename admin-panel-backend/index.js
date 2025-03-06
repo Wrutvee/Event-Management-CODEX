@@ -73,16 +73,16 @@ app.use((err, req, res, next) => {
 });
 
 // Provide CSRF token to frontend
-app.get('/csrf-token', (req, res) => {
+app.get('/api/csrf-token', (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
 });
 
 // Auth routes
-app.use("/auth", authRoutes);
-app.use("/events", eventRoutes);
-app.use("/invite", inviteRoutes);
-app.use("/profile", profileRoutes);
-app.use("/uploads", uploadRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/events", eventRoutes);
+app.use("/api/invite", inviteRoutes);
+app.use("/api/profile", profileRoutes);
+app.use("/api/uploads", uploadRoutes);
 
 app.listen(3000, () => {
   console.log("server started");
