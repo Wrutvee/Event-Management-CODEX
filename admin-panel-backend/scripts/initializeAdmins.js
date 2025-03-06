@@ -15,6 +15,7 @@ async function createSuperAdmin() {
             roleAssigned: "superadmin"
         });
         await inviteCode.save();
+        console.log('Invite code created successfully :' , inviteCode );
 
         // // Hash password
         // const salt = await bcrypt.genSalt(10);
